@@ -2,14 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "./main.go",
+      "src": "vercel/home.go",
+      "use": "@vercel/go"
+    },
+    {
+      "src": "vercel/hook.go",
       "use": "@vercel/go"
     }
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/main.go"
+      "source": "/",
+      "destination": "vercel/home.go"
+    },
+    {
+      "source": "/hook/(.*)",
+      "destination": "vercel/hook.go"
     }
   ]
 }

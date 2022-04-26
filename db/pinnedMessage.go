@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-func AddPinnedMessage(data *types.PinnedMessage) (any, error) {
-	data.CreatedAt = time.Now()
-	one, err := client.Database("pinned_messages").Collection(fmt.Sprintf("chat_%d", data.ChatId)).InsertOne(ctx, data)
+func AddPinnedMessage(pm *types.PinnedMessage) (interface{}, error) {
+	pm.CreatedAt = time.Now()
+	one, err := db.Collection(fmt.Sprintf("pinned_messages_%d", pm.ChatId)).InsertOne(ctx, pm)
 	if err != nil {
 		log.Println("AddPinnedMessage error:", err)
 		return 0, err
@@ -21,7 +21,7 @@ func AddPinnedMessage(data *types.PinnedMessage) (any, error) {
 }
 
 func RemovePinnedMessage(id int, chatId int64) (int64, error) {
-	one, err := client.Database("pinned_messages").Collection(fmt.Sprintf("chat_%d", chatId)).DeleteOne(ctx, bson.M{"_id": id})
+	one, err := db.Collection(fmt.Sprintf("pinned_messages_%d", chatId)).DeleteOne(ctx, bson.M{"_id": id})
 	if err != nil {
 		log.Println("RemovePinnedMessage error:", err)
 		return 0, err
@@ -34,8 +34,7 @@ func GetPinnedMessages(chatId int64) ([]*types.PinnedMessage, error) {
 	findOptions := options.Find()
 	findOptions.SetSort(bson.M{"$natural": -1})
 
-	fmt.Println(fmt.Sprintf("chat_%d", chatId))
-	cur, err := client.Database("pinned_messages").Collection(fmt.Sprintf("chat_%d", chatId)).Find(ctx, bson.M{}, findOptions)
+	cur, err := db.Collection(fmt.Sprintf("pinned_messages_%d", chatId)).Find(ctx, bson.M{}, findOptions)
 	if err != nil {
 		log.Println("GetPinnedMessages error:", err)
 		return nil, err

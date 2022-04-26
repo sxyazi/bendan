@@ -41,3 +41,14 @@ func Config(name string) string {
 	value, _ := config[name]
 	return value
 }
+
+func CreateBot() *tgbotapi.BotAPI {
+	bot, err := tgbotapi.NewBotAPI(Config("bot_token"))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	bot.Debug = true
+	log.Printf("Authorized on account %s", bot.Self.UserName)
+	return bot
+}
