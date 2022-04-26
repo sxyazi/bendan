@@ -13,11 +13,11 @@ func unpinOldMessages(bot *tgbotapi.BotAPI, chatId int64) {
 		return
 	}
 
-	if len(messages) <= 3 {
+	if len(messages) <= 10 {
 		return
 	}
 
-	for _, message := range messages[3:] {
+	for _, message := range messages[10:] {
 		if _, err := bot.Request(&tgbotapi.UnpinChatMessageConfig{
 			ChatID:    chatId,
 			MessageID: message.Id,
