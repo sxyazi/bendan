@@ -12,7 +12,11 @@ var ctx = context.TODO()
 var client *mongo.Client
 var db *mongo.Database
 
-func init() {
+func Db() *mongo.Database {
+	if db != nil {
+		return db
+	}
+
 	var err error
 	client, err = mongo.Connect(ctx, options.Client().ApplyURI(Config("db_uri")))
 	if err != nil {
@@ -20,4 +24,5 @@ func init() {
 	}
 
 	db = client.Database(Config("db_name"))
+	return db
 }
