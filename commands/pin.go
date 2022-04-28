@@ -33,9 +33,8 @@ func Pin(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
 	}
 
 	_, err := db.AddPinnedMessage(&types.PinnedMessage{
-		Id:         msg.ReplyToMessage.MessageID,
-		ChatId:     msg.Chat.ID,
-		FromUserId: msg.From.ID,
+		Id:     msg.ReplyToMessage.MessageID,
+		ChatId: msg.Chat.ID,
 	})
 	if err != nil {
 		sent := tgbotapi.NewMessage(msg.Chat.ID, "It seems pinned already")
