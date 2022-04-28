@@ -6,17 +6,24 @@
 
 目前包含以下指令：
 
-- 对消息回复 `/*`
-  如 `/吃`，Bot 发送一个 `a 吃了 b ！`
-
-- 对消息回复 `/* *`
-  如 `/吃 豆腐`，Bot 发送一个 `a 吃 b 豆腐！`
-
+- 对消息回复 `/*`。如 `/吃`，Bot 发送一个 `a 吃了 b ！`
+- 对消息回复 `/* *`。如 `/吃 豆腐`，Bot 发送一个 `a 吃 b 豆腐！`
 - 对消息回复 `/pin`，Bot 将消息置顶（若有权限），最多保留 10 条由 Bot 置顶的消息
 
-## 部署
+## 部署到 Vercel
 
-你可以 Fork 本仓库，然后一键部署到 Vercel，或部署到其它服务器。您需要做的是，在根目录创建 `.config` 文件，并做如下配置：
+你可以 Fork 本仓库，然后一键部署到 Vercel。需要在 Vercel ENV 中配置如下变量：
+
+- `BOT_TOKEN`：Telegram Bot 的 Token
+- `DB_URI`：MongoDB 的连接 URI。用于置顶功能，如果不需要此功能，可以不配置
+- `DB_NAME`：MongoDB 的数据库名称。同上，可以不配置
+- `REFRESH_KEY`：用于第一次触发 Vercel 设置 Webhook 的密钥
+
+设置完成后，访问 `https://your-domain.vercel.app/?key=<refresh_key>` 对 Webhook 初始化即可。
+
+## 部署到 Server
+
+您需要做的是，在根目录创建 `.config` 文件，并做如下配置：
 
 ```json
 {
@@ -27,12 +34,7 @@
 }
 ```
 
-- `bot_token`：Telegram Bot 的 Token
-- `db_uri`：MongoDB 的连接 URI。用于置顶功能，如果不需要此功能，可以不配置
-- `db_name`：MongoDB 的数据库名称。同上，可以不配置
-- `refresh_key`：用于第一次触发 Vercel 设置 Webhook 的密钥
-
-配置完成后，若您部署在 Vercel，则需要访问 `https://your-domain.vercel.app/?key=<refresh_key>` 对 Webhook 初始化。若在服务器部署，则直接运行程序文件即可。
+以上参数同 [#部署到 Vercel](部署到 Vercel)，配置完成后直接运行主程序即可。
 
 ## 隐私
 
