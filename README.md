@@ -34,10 +34,14 @@
 }
 ```
 
-以上参数同 [#部署到 Vercel](部署到 Vercel)，配置完成后直接运行主程序即可。
+以上参数同 [部署到 Vercel](#部署到-vercel)，配置完成后直接运行主程序即可。
 
 ## 隐私
 
 受 Telegram Bot API 限制，无法获取所有已置顶消息，以用于“仅保留10条置顶”功能
 
 因此需要将由 Bot 置顶的消息存储下来，但也仅存储了 `(置顶消息ID, 群组ID, 置顶时间)` 用于取消老的消息置顶，该 Bot ***不会存储任何与消息内容有关的信息***。
+
+## License
+
+Bendan Bot is licensed under the [MIT License](https://github.com/sxyazi/bendan/blob/master/LICENSE)
