@@ -8,7 +8,9 @@ import (
 )
 
 func Call(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
-	if !strings.HasPrefix(msg.Text, "/") {
+	// valid:   /call
+	// invalid: //call
+	if len(msg.Text) < 2 || msg.Text[0] != '/' || msg.Text[1] == '/' {
 		return false
 	}
 
