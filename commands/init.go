@@ -8,6 +8,7 @@ import (
 
 var all = []func(*tgbotapi.BotAPI, *tgbotapi.Message) bool{
 	Pin,
+	Me,
 	Call,
 }
 
