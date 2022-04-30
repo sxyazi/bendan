@@ -28,7 +28,7 @@ func unpinOldMessages(bot *tgbotapi.BotAPI, chatId int64) {
 }
 
 func Pin(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
-	if msg.Text != "/pin" || msg.ReplyToMessage == nil {
+	if msg.Text != "//pin" || msg.ReplyToMessage == nil {
 		return false
 	}
 
