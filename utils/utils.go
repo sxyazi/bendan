@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -51,4 +52,16 @@ func CreateBot() *tgbotapi.BotAPI {
 	bot.Debug = true
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 	return bot
+}
+
+func NeedToIgnore(bot *tgbotapi.BotAPI, text string) bool {
+	matches := regexp.MustCompile(`^\s*/\w+@(\w+(?:Bot|_bot))\b`).FindStringSubmatch(text)
+	if len(matches) == 0 {
+		return false
+	}
+
+	if matches[1] != bot.Self.UserName {
+		return true
+	}
+	return false
 }
