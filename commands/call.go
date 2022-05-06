@@ -7,6 +7,35 @@ import (
 	"strings"
 )
 
+func targetOfInteraction(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) *tgbotapi.User {
+	// Just raised a call blandly
+	if msg.ReplyToMessage == nil {
+		return &tgbotapi.User{ID: msg.From.ID, FirstName: "自己"}
+	}
+
+	// Aiming at one mentioned by this bot
+	target := msg.ReplyToMessage.From
+	if target.ID == bot.Self.ID && len(msg.ReplyToMessage.Entities) > 0 {
+		for _, entity := range msg.ReplyToMessage.Entities {
+			if entity.Type != "text_mention" || entity.User == nil {
+				continue
+			}
+
+			target = entity.User
+			if target.ID != msg.From.ID {
+				break
+			}
+		}
+	}
+
+	// Aiming at its previous session
+	if target.ID == msg.From.ID {
+		return &tgbotapi.User{ID: msg.From.ID, FirstName: "自己"}
+	}
+
+	return target
+}
+
 func Call(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
 	// valid:   /call
 	// invalid: //call
@@ -14,19 +43,8 @@ func Call(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
 		return false
 	}
 
-	// Target of the interaction
-	var target *tgbotapi.User
-	if msg.ReplyToMessage != nil {
-		target = msg.ReplyToMessage.From
-	}
-	if target == nil || target.ID == msg.From.ID {
-		target = &tgbotapi.User{
-			ID:        msg.From.ID,
-			FirstName: "自己",
-		}
-	}
-
 	// Bot does not in the interaction
+	target := targetOfInteraction(bot, msg)
 	if target.ID == bot.Self.ID {
 		return false
 	}
