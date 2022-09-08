@@ -41,7 +41,7 @@ func Purify(msg *tgbotapi.Message) bool {
 	wg.Wait()
 	close(results)
 
-	text := "<b>The URLs purified below:</b>\n"
+	text := "<b>The URLs purified below:</b>\n\n"
 	for r := range results {
 		text += r + "\n"
 	}

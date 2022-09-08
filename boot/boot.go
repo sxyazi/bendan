@@ -16,6 +16,7 @@ func ServePool() {
 	u.Timeout = 60
 
 	commands.Bot = bot
+	bot.Request(&tgbotapi.DeleteWebhookConfig{})
 	for update := range bot.GetUpdatesChan(u) {
 		commands.Handle(&update)
 	}

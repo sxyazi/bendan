@@ -44,7 +44,9 @@ func EditText(sent *tgbotapi.Message, text string) bool {
 			ChatID:    sent.Chat.ID,
 			MessageID: sent.MessageID,
 		},
-		Text: text,
+		Text:                  text,
+		ParseMode:             tgbotapi.ModeHTML,
+		DisableWebPagePreview: true,
 	})
 	if err != nil {
 		log.Println("Error occurred while editing text:", err)
