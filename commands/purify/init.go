@@ -44,6 +44,7 @@ var KnownTracks = &knownTracks{}
 
 func init() {
 	KnownTracks.add("https?://youtu.be/([a-zA-Z0-9_]{10,})", youtube)
+	KnownTracks.add(`https?://twitter.com/(.+?/status/\d+).+`, twitter)
 	KnownTracks.add(`https?://(?:www\.)?bilibili\.com/video/(av\d+).+`, bilibili)
 	KnownTracks.add(`https?://(?:www\.)?bilibili\.com/video/(BV[a-zA-Z0-9]{10,})`, bilibili)
 }
