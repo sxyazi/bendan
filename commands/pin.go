@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func unpinOldMessages(bot *tgbotapi.BotAPI, chatId int64) {
+func unpinOldMessages(chatId int64) {
 	messages, err := db.GetPinnedMessages(chatId)
 	if err != nil {
 		return
@@ -18,7 +18,7 @@ func unpinOldMessages(bot *tgbotapi.BotAPI, chatId int64) {
 	}
 
 	for _, message := range messages[10:] {
-		if _, err := bot.Request(&tgbotapi.UnpinChatMessageConfig{
+		if _, err := Bot.Request(&tgbotapi.UnpinChatMessageConfig{
 			ChatID:    chatId,
 			MessageID: message.Id,
 		}); err == nil {
@@ -27,7 +27,7 @@ func unpinOldMessages(bot *tgbotapi.BotAPI, chatId int64) {
 	}
 }
 
-func Pin(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
+func Pin(msg *tgbotapi.Message) bool {
 	if msg.Text != "//pin" || msg.ReplyToMessage == nil {
 		return false
 	}
@@ -37,13 +37,11 @@ func Pin(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
 		ChatId: msg.Chat.ID,
 	})
 	if err != nil {
-		sent := tgbotapi.NewMessage(msg.Chat.ID, "It seems pinned already")
-		sent.ReplyToMessageID = msg.MessageID
-		bot.Send(sent)
+		ReplyText(msg, "It seems pinned already")
 		return true
 	}
 
-	req, err := bot.Request(&tgbotapi.PinChatMessageConfig{
+	req, err := Bot.Request(&tgbotapi.PinChatMessageConfig{
 		ChatID:              msg.Chat.ID,
 		MessageID:           msg.ReplyToMessage.MessageID,
 		DisableNotification: false,
@@ -53,10 +51,9 @@ func Pin(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
 		log.Println("Error pinning message:", req.Description)
 
 		db.RemovePinnedMessage(msg.ReplyToMessage.MessageID, msg.Chat.ID)
-		sent := tgbotapi.NewMessage(msg.Chat.ID, "Check if the rights are enough in the chat")
-		bot.Send(sent)
+		ReplyText(msg, "Check if the rights are enough in the chat")
 	}
 
-	unpinOldMessages(bot, msg.Chat.ID)
+	unpinOldMessages(msg.Chat.ID)
 	return true
 }

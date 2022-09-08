@@ -7,20 +7,23 @@ import (
 	"log"
 )
 
-var all = []func(*tgbotapi.BotAPI, *tgbotapi.Message) bool{
+var all = []func(*tgbotapi.Message) bool{
+	Purify,
 	Pin,
 	Me,
 	Call,
 }
 
-func Handle(bot *tgbotapi.BotAPI, update *tgbotapi.Update) {
-	if update.Message == nil || NeedToIgnore(bot, update.Message.Text) {
+var Bot *tgbotapi.BotAPI
+
+func Handle(update *tgbotapi.Update) {
+	if update.Message == nil || NeedToIgnore(Bot, update.Message.Text) {
 		return
 	}
 
 	log.Printf("[%s] says: %s", update.Message.From.UserName, update.Message.Text)
 	for _, command := range all {
-		if command(bot, update.Message) {
+		if command(update.Message) {
 			break
 		}
 	}

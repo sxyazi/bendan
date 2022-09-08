@@ -15,8 +15,9 @@ func ServePool() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
+	commands.Bot = bot
 	for update := range bot.GetUpdatesChan(u) {
-		commands.Handle(bot, &update)
+		commands.Handle(&update)
 	}
 }
 

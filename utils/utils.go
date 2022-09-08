@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 )
+import collect "github.com/sxyazi/go-collection"
 
 func LinkedName(user *tgbotapi.User) string {
 	var lastName = user.LastName
@@ -64,4 +65,9 @@ func NeedToIgnore(bot *tgbotapi.BotAPI, text string) bool {
 		return true
 	}
 	return false
+}
+
+func ExtractLinks(s string) []string {
+	matches := regexp.MustCompile(`https?://(?:[^/\s]+(?:\.|\b))*(/[^\s!$'()*,:;\[\]]*)?`).FindAllString(s, -1)
+	return collect.Unique(matches)
 }

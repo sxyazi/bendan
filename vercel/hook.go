@@ -15,6 +15,7 @@ func HookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	commands.Handle(bot, update)
+	commands.Bot = bot
+	commands.Handle(update)
 	fmt.Fprint(w, "request processed")
 }

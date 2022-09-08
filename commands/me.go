@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func Me(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
+func Me(msg *tgbotapi.Message) bool {
 	if !strings.HasPrefix(msg.Text, "/me") {
 		return false
 	}
@@ -17,8 +17,6 @@ func Me(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
 		return false
 	}
 
-	sent := tgbotapi.NewMessage(msg.Chat.ID, fmt.Sprintf("%s %s！", LinkedName(msg.From), message))
-	sent.ParseMode = tgbotapi.ModeHTML
-	bot.Send(sent)
+	SendText(msg.Chat.ID, fmt.Sprintf("%s %s！", LinkedName(msg.From), message))
 	return true
 }

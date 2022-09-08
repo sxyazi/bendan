@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func targetOfInteraction(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) *tgbotapi.User {
+func targetOfInteraction(msg *tgbotapi.Message) *tgbotapi.User {
 	// Just raised a call blandly
 	if msg.ReplyToMessage == nil {
 		return &tgbotapi.User{ID: msg.From.ID, FirstName: "自己"}
@@ -15,7 +15,7 @@ func targetOfInteraction(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) *tgbotapi.
 
 	// Aiming at one mentioned by this bot
 	target := msg.ReplyToMessage.From
-	if target.ID == bot.Self.ID && len(msg.ReplyToMessage.Entities) > 0 {
+	if target.ID == Bot.Self.ID && len(msg.ReplyToMessage.Entities) > 0 {
 		for _, entity := range msg.ReplyToMessage.Entities {
 			if entity.Type != "text_mention" || entity.User == nil {
 				continue
@@ -36,7 +36,7 @@ func targetOfInteraction(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) *tgbotapi.
 	return target
 }
 
-func Call(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
+func Call(msg *tgbotapi.Message) bool {
 	// valid:   /call
 	// invalid: //call
 	if len(msg.Text) < 2 || msg.Text[0] != '/' || msg.Text[1] == '/' {
@@ -44,8 +44,8 @@ func Call(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
 	}
 
 	// Bot does not in the interaction
-	target := targetOfInteraction(bot, msg)
-	if target.ID == bot.Self.ID {
+	target := targetOfInteraction(msg)
+	if target.ID == Bot.Self.ID {
 		return false
 	}
 
@@ -60,8 +60,6 @@ func Call(bot *tgbotapi.BotAPI, msg *tgbotapi.Message) bool {
 		return false
 	}
 
-	sent := tgbotapi.NewMessage(msg.Chat.ID, message)
-	sent.ParseMode = tgbotapi.ModeHTML
-	bot.Send(sent)
+	SendText(msg.Chat.ID, message)
 	return true
 }
