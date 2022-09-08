@@ -8,10 +8,10 @@ import (
 )
 
 var all = []func(*tgbotapi.Message) bool{
-	Purify,
 	Pin,
 	Me,
 	Call,
+	Purify,
 }
 
 var Bot *tgbotapi.BotAPI

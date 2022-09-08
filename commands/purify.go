@@ -10,7 +10,7 @@ import (
 func Purify(msg *tgbotapi.Message) bool {
 	urls := utils.ExtractLinks(msg.Text + "\n" + msg.Caption)
 	if len(urls) < 1 {
-		return false
+		return true
 	}
 
 	purifiers := make(map[string]int, len(urls))
@@ -20,27 +20,16 @@ func Purify(msg *tgbotapi.Message) bool {
 		}
 	}
 	if len(purifiers) < 1 {
-		return false
+		return true
+	}
+
+	sent := ReplyText(msg, "Purifying up the URLs...")
+	if sent == nil {
+		return true
 	}
 
 	wg := sync.WaitGroup{}
 	results := make(chan string, len(purifiers))
-	go func() {
-		sent := ReplyText(msg, "Purifying up the URLs...")
-		if sent == nil {
-			return
-		}
-
-		wg.Wait()
-		close(results)
-
-		text := "<b>The URLs purified below:</b>\n"
-		for r := range results {
-			text += r + "\n"
-		}
-		EditText(sent, text)
-	}()
-
 	for url, i := range purifiers {
 		wg.Add(1)
 		go func(url string, i int) {
@@ -49,5 +38,13 @@ func Purify(msg *tgbotapi.Message) bool {
 		}(url, i)
 	}
 
-	return false
+	wg.Wait()
+	close(results)
+
+	text := "<b>The URLs purified below:</b>\n"
+	for r := range results {
+		text += r + "\n"
+	}
+	EditText(sent, text)
+	return true
 }
