@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	collect "github.com/sxyazi/go-collection"
 	"testing"
@@ -47,4 +48,8 @@ func Test_ExtractLinks(t *testing.T) {
 			t.Errorf("ExtractLinks(%s) = %v, want %v", d.text, got, d.want)
 		}
 	}
+}
+
+func Test_ParseTrackExpr(t *testing.T) {
+	fmt.Println(ParseTrackExpr(`p:pi;foo:ni,-10`))
 }

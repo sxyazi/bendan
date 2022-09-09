@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
+	"time"
 )
 import collect "github.com/sxyazi/go-collection"
 
@@ -30,7 +31,7 @@ func Config(name string) string {
 		return os.Getenv(strings.ToUpper(name))
 	}
 
-	file, err := ioutil.ReadFile(".config")
+	file, err := os.ReadFile(".config")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,4 +71,40 @@ func NeedToIgnore(bot *tgbotapi.BotAPI, text string) bool {
 func ExtractLinks(s string) []string {
 	matches := regexp.MustCompile(`https?://(?:[^/\s]+(?:\.|\b))*(/[^\s!$'()*,:;\[\]]*)?`).FindAllString(s, -1)
 	return collect.Unique(matches)
+}
+
+func NewClient() *http.Client {
+	t := http.DefaultTransport.(*http.Transport).Clone()
+	t.MaxIdleConns = 200
+	t.MaxConnsPerHost = 10
+	t.MaxIdleConnsPerHost = 10
+	t.IdleConnTimeout = 5 * time.Minute
+
+	return &http.Client{
+		Timeout:   30 * time.Second,
+		Transport: t,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+}
+
+var Client = NewClient()
+
+func SeekLocation(u string) string {
+	// Set up the request
+	req, err := http.NewRequest("GET", u, nil)
+	if err != nil {
+		return ""
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1321.0")
+
+	// Send the request
+	resp, err := Client.Do(req)
+	if err != nil {
+		return ""
+	}
+
+	resp.Body.Close()
+	return resp.Header.Get("Location")
 }

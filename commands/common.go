@@ -53,3 +53,8 @@ func EditText(sent *tgbotapi.Message, text string) bool {
 	}
 	return err == nil
 }
+
+func DeleteMessage(sent *tgbotapi.Message) bool {
+	_, err := Bot.Request(tgbotapi.DeleteMessageConfig{ChatID: sent.Chat.ID, MessageID: sent.MessageID})
+	return err == nil
+}

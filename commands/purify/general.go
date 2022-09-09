@@ -1,10 +1,7 @@
 package purify
 
 import (
-	collect "github.com/sxyazi/go-collection"
 	"net/url"
-	"regexp"
-	"strings"
 )
 
 var generalParams = map[string]struct{}{
@@ -33,18 +30,12 @@ var generalParams = map[string]struct{}{
 	"vd_source":         {},
 }
 
-var generalRe = regexp.MustCompile(`(?i)` + strings.Join(collect.Keys(generalParams), "|"))
-
-func general(u string) string {
-	parsed, err := url.Parse(u)
-	if err != nil {
-		return ""
-	}
-
-	qs := parsed.Query()
+func general(_ []string, u *url.URL) string {
+	qs := u.Query()
 	for p := range generalParams {
 		qs.Del(p)
 	}
-	parsed.RawQuery = qs.Encode()
-	return parsed.String()
+
+	u.RawQuery = qs.Encode()
+	return u.String()
 }

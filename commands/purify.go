@@ -4,6 +4,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sxyazi/bendan/commands/purify"
 	"github.com/sxyazi/bendan/utils"
+	"strings"
 	"sync"
 )
 
@@ -13,38 +14,44 @@ func Purify(msg *tgbotapi.Message) bool {
 		return true
 	}
 
-	purifiers := make(map[string]int, len(urls))
+	tickers := make([]*purify.Tracker, 0, len(urls))
 	for _, url := range urls {
-		if i := purify.KnownTracks.Match(url); i != -1 {
-			purifiers[url] = i
+		if t := purify.Tracks.Match(url); t != nil {
+			tickers = append(tickers, t)
 		}
 	}
-	if len(purifiers) < 1 {
+	if len(tickers) < 1 {
 		return true
+	}
+
+	wg := sync.WaitGroup{}
+	results := make([]string, len(tickers))
+	for i, t := range tickers {
+		wg.Add(1)
+		go func(i int, t *purify.Tracker) {
+			defer wg.Done()
+			results[i] = purify.Tracks.Handle(t)
+		}(i, t)
 	}
 
 	sent := ReplyText(msg, "Purifying up the URLs...")
 	if sent == nil {
 		return true
 	}
-
-	wg := sync.WaitGroup{}
-	results := make(chan string, len(purifiers))
-	for url, i := range purifiers {
-		wg.Add(1)
-		go func(url string, i int) {
-			defer wg.Done()
-			results <- purify.KnownTracks.Handle(url, i)
-		}(url, i)
-	}
-
 	wg.Wait()
-	close(results)
 
-	text := "<b>The URLs purified below:</b>\n\n"
-	for r := range results {
-		text += r + "\n"
+	text := ""
+	for _, r := range results {
+		if r != "" {
+			text += r + "\n"
+		}
 	}
-	EditText(sent, text)
+	if text == "" {
+		DeleteMessage(sent)
+	} else if strings.Count(text, "\n") == 1 {
+		EditText(sent, "<b>Purified URL:</b> "+text)
+	} else {
+		EditText(sent, "<b>The URLs purified below:</b>\n\n"+text)
+	}
 	return true
 }
