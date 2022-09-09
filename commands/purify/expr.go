@@ -36,7 +36,6 @@ func parseExpr(e string) map[string][]string {
 }
 
 func validExpr(u *url.URL, allowed map[string][]string) (removal []string) {
-
 	if allowed == nil {
 		return // all allowed
 	}

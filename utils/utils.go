@@ -104,7 +104,11 @@ func SeekLocation(u string) string {
 	if err != nil {
 		return ""
 	}
-
 	resp.Body.Close()
-	return resp.Header.Get("Location")
+
+	loc := resp.Header.Get("Location")
+	if loc == "" || loc == u {
+		return ""
+	}
+	return loc
 }

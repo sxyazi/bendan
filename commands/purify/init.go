@@ -1,90 +1,67 @@
 package purify
 
 import (
-	collect "github.com/sxyazi/go-collection"
 	"net/url"
-	"regexp"
-	"strings"
 )
 
-type tracks struct {
-	re      []*regexp.Regexp
-	cb      []func([]string, *url.URL) string
-	allowed []map[string][]string
+type tracks []interface {
+	match(*url.URL) []string
+	handle(*Stage) string
+	allowed(*url.URL) string
 }
 
-type Tracker struct {
-	idx  int
-	orig string
-	url  *url.URL
+type Stage struct {
+	idx     int
+	deep    int
+	orig    string
+	url     *url.URL
+	matches []string
 }
 
-func (k *tracks) add(re, al string, cb func([]string, *url.URL) string) {
-	k.re = append(k.re, regexp.MustCompile(re))
-	k.cb = append(k.cb, cb)
-	k.allowed = append(k.allowed, parseExpr(al))
-}
-
-// Match returns the matched tracker
-// al == "" && cb == nil, not allowed
-// al == "" && cb != nil, (Y) force to use cb
-// al != "" && cb == nil, (Y|N) only use al
-// al != "" && cb != nil, (Y) use cb after al is applied
-func (k *tracks) Match(u string) *Tracker {
+func (t tracks) Test(u string) *Stage {
 	parsed, err := url.Parse(u)
 	if err != nil {
 		return nil
 	}
 
-	for i, re := range k.re {
-		if !re.MatchString(u) {
+	for i, v := range t {
+		matches := v.match(parsed)
+		if len(matches) < 1 {
 			continue
 		}
 
-		removal := validExpr(parsed, k.allowed[i])
+		removal := validExpr(parsed, parseExpr(v.allowed(parsed)))
 		qs := parsed.Query()
 		for _, r := range removal {
 			qs.Del(r)
 		}
-		parsed.RawQuery = qs.Encode()
 
-		if k.cb[i] != nil {
-			return &Tracker{i, u, parsed}
-		} else if len(removal) > 0 {
-			return &Tracker{i, u, parsed}
-		}
+		parsed.RawQuery = qs.Encode()
+		return &Stage{i, 0, u, parsed, matches}
 	}
 	return nil
 }
 
-func (k *tracks) Handle(t *Tracker) string {
-	if t == nil {
+func (t tracks) Do(s *Stage) string {
+	if s == nil {
 		return ""
 	}
 
-	cb := k.cb[t.idx]
-	if cb == nil {
-		return t.url.String()
+	s.deep++
+	if s.deep > 5 {
+		return "" // avoid infinite loop
 	}
-	return cb(k.re[t.idx].FindStringSubmatch(t.orig), t.url)
+
+	return t[s.idx].handle(s)
 }
 
-func (k *tracks) Purify(u string) string {
-	if t := k.Match(u); t != nil {
-		return k.Handle(t)
-	}
-	return u
-}
-
-var Tracks = &tracks{}
+var Tracks = tracks{}
 
 func init() {
-	Tracks.add(`https?://youtu.be/([a-zA-Z0-9_-]{10,})`, ``, youtube)
-	Tracks.add(`https?://b23.tv/([a-zA-Z0-9]{6,})`, ``, bilibili)
-
-	Tracks.add(`https?://twitter.com/(.+?/status/\d+)`, `-`, nil)
-	Tracks.add(`https?://(?:www\.)?bilibili\.com/video/(av\d+)`, `p:pi`, nil)
-
-	Tracks.add(`https?://(?:www\.)?bilibili\.com/video/(BV[a-zA-Z0-9]{10,})`, `p:pi`, bilibili)
-	Tracks.add(strings.Join(collect.Keys(generalParams), "|"), ``, general)
+	Tracks = append(Tracks, &youtube{})
+	Tracks = append(Tracks, &bilibili{})
+	Tracks = append(Tracks, &twitter{})
+	Tracks = append(Tracks, &aff{})
+	Tracks = append(Tracks, &short{})
+	Tracks = append(Tracks, &general{})
 }

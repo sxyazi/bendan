@@ -14,23 +14,23 @@ func Purify(msg *tgbotapi.Message) bool {
 		return true
 	}
 
-	tickers := make([]*purify.Tracker, 0, len(urls))
+	stages := make([]*purify.Stage, 0, len(urls))
 	for _, url := range urls {
-		if t := purify.Tracks.Match(url); t != nil {
-			tickers = append(tickers, t)
+		if t := purify.Tracks.Test(url); t != nil {
+			stages = append(stages, t)
 		}
 	}
-	if len(tickers) < 1 {
+	if len(stages) < 1 {
 		return true
 	}
 
 	wg := sync.WaitGroup{}
-	results := make([]string, len(tickers))
-	for i, t := range tickers {
+	results := make([]string, len(stages))
+	for i, t := range stages {
 		wg.Add(1)
-		go func(i int, t *purify.Tracker) {
+		go func(i int, t *purify.Stage) {
 			defer wg.Done()
-			results[i] = purify.Tracks.Handle(t)
+			results[i] = purify.Tracks.Do(t)
 		}(i, t)
 	}
 
