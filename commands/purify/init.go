@@ -18,26 +18,22 @@ type Stage struct {
 	matches []string
 }
 
-func (t tracks) Test(u string) *Stage {
-	parsed, err := url.Parse(u)
-	if err != nil {
-		return nil
-	}
-
+func (t tracks) Test(u *url.URL) *Stage {
+	orig := u.String()
 	for i, v := range t {
-		matches := v.match(parsed)
+		matches := v.match(u)
 		if len(matches) < 1 {
 			continue
 		}
 
-		removal := validExpr(parsed, parseExpr(v.allowed(parsed)))
-		qs := parsed.Query()
+		removal := validExpr(u, parseExpr(v.allowed(u)))
+		qs := u.Query()
 		for _, r := range removal {
 			qs.Del(r)
 		}
 
-		parsed.RawQuery = qs.Encode()
-		return &Stage{i, 0, u, parsed, matches}
+		u.RawQuery = qs.Encode()
+		return &Stage{i, 0, orig, u, matches}
 	}
 	return nil
 }

@@ -27,7 +27,9 @@ var reAffParams = regexp.MustCompile(`(?i)\b(` + strings.Join(affParams, "|") + 
 type aff struct{}
 
 func (a *aff) match(u *url.URL) []string {
-	if !reAffPaths.MatchString(u.Path) {
+	if u.Path == "" || u.Path == "/" {
+		// root path
+	} else if !reAffPaths.MatchString(u.Path) {
 		return nil
 	}
 	return reAffParams.FindStringSubmatch(u.RawQuery)
@@ -43,7 +45,7 @@ func (a *aff) handle(s *Stage) string {
 	s.url.RawQuery = qs.Encode()
 
 	// dig down to `general`
-	if t := Tracks.Test(s.url.String()); t != nil {
+	if t := Tracks.Test(s.url); t != nil {
 		t.deep = s.deep
 		return Tracks.Do(t)
 	}

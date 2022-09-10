@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	collect "github.com/sxyazi/go-collection"
 	"testing"
@@ -40,16 +39,17 @@ func Test_ExtractLinks(t *testing.T) {
 		{"https://www.google.com", []string{"https://www.google.com"}},
 		{"**[link](https://t.me/)**", []string{"https://t.me/"}},
 		{"**[link](https://www.bilibili.com/video/av900297685?arg1=val1)**", []string{"https://www.bilibili.com/video/av900297685?arg1=val1"}},
-		{"http://localhost间中 https://127.0.0.1/@bendan_bot简中", []string{"http://localhost", "https://127.0.0.1/@bendan_bot简中"}},
+		{"http://localhost间中 https://127.0.0.1/@bendan_bot简中", []string{"http://localhost", "https://127.0.0.1/@bendan_bot%E7%AE%80%E4%B8%AD"}},
 	}
 
 	for _, d := range data {
-		if got := ExtractLinks(d.text); !collect.Same(got, d.want) {
-			t.Errorf("ExtractLinks(%s) = %v, want %v", d.text, got, d.want)
+		var got []string
+		for _, u := range ExtractUrls(d.text) {
+			got = append(got, u.String())
+		}
+
+		if !collect.Same(got, d.want) {
+			t.Errorf("ExtractUrls(%s) = %v, want %v", d.text, got, d.want)
 		}
 	}
-}
-
-func Test_ParseTrackExpr(t *testing.T) {
-	fmt.Println(ParseTrackExpr(`p:pi;foo:ni,-10`))
 }

@@ -15,8 +15,8 @@ func (*short) match(u *url.URL) []string {
 }
 
 func (*short) handle(s *Stage) string {
-	loc := utils.SeekLocation(s.url.String())
-	if loc == "" {
+	loc := utils.SeekLocation(s.url)
+	if loc == nil {
 		return ""
 	}
 
@@ -24,7 +24,7 @@ func (*short) handle(s *Stage) string {
 		t.deep = s.deep
 		return Tracks.Do(t)
 	}
-	return loc
+	return loc.String()
 }
 
 func (*short) allowed(*url.URL) string {

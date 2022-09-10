@@ -9,7 +9,7 @@ import (
 )
 
 func Purify(msg *tgbotapi.Message) bool {
-	urls := utils.ExtractLinks(msg.Text + "\n" + msg.Caption)
+	urls := utils.ExtractUrls(msg.Text + "\n" + msg.Caption)
 	if len(urls) < 1 {
 		return true
 	}
