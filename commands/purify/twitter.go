@@ -14,9 +14,9 @@ func (*twitter) match(u *url.URL) []string {
 }
 
 func (*twitter) handle(s *Stage) string {
-	return s.url.String()
+	return "not implemented"
 }
 
-func (*twitter) allowed(*url.URL) string {
-	return "-"
+func (*twitter) allowed(*url.URL) (string, bool) {
+	return "-", true
 }

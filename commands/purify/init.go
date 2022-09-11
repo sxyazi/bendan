@@ -7,7 +7,7 @@ import (
 type tracks []interface {
 	match(*url.URL) []string
 	handle(*Stage) string
-	allowed(*url.URL) string
+	allowed(*url.URL) (string, bool)
 }
 
 type Stage struct {
@@ -26,14 +26,20 @@ func (t tracks) Test(u *url.URL) *Stage {
 			continue
 		}
 
-		removal := validExpr(u, parseExpr(v.allowed(u)))
+		allowed, stop := v.allowed(u)
+		removal := validExpr(u, parseExpr(allowed))
+
 		qs := u.Query()
 		for _, r := range removal {
 			qs.Del(r)
 		}
-
 		u.RawQuery = qs.Encode()
-		return &Stage{i, 0, orig, u, matches}
+
+		if !stop {
+			return &Stage{i, 0, orig, u, matches}
+		} else if len(removal) > 0 {
+			return &Stage{-1, 0, orig, u, matches}
+		}
 	}
 	return nil
 }
@@ -41,6 +47,8 @@ func (t tracks) Test(u *url.URL) *Stage {
 func (t tracks) Do(s *Stage) string {
 	if s == nil {
 		return ""
+	} else if s.idx == -1 {
+		return s.url.String()
 	}
 
 	s.deep++

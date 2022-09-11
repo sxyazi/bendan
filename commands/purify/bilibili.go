@@ -20,17 +20,12 @@ func (b *bilibili) match(u *url.URL) []string {
 }
 
 func (b *bilibili) handle(s *Stage) string {
-	id := s.matches[1]
-	if id[:2] == "BV" {
-		id = b.bvToAv(id)
-	}
-
-	s.url.Path = fmt.Sprintf("/video/%s", id)
+	s.url.Path = "/video/" + b.bvToAv(s.matches[1])
 	return s.url.String()
 }
 
-func (b *bilibili) allowed(*url.URL) string {
-	return "p:pi"
+func (b *bilibili) allowed(u *url.URL) (string, bool) {
+	return "p:pi", reBilibiliAV.MatchString(u.String())
 }
 
 func (b *bilibili) bvToAv(s string) string {

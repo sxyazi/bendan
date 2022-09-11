@@ -53,6 +53,6 @@ func (*general) handle(s *Stage) string {
 	return s.url.String()
 }
 
-func (*general) allowed(*url.URL) string {
-	return ""
+func (*general) allowed(*url.URL) (string, bool) {
+	return "", false
 }

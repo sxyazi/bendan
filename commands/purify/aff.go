@@ -52,6 +52,6 @@ func (a *aff) handle(s *Stage) string {
 	return s.url.String()
 }
 
-func (a *aff) allowed(*url.URL) string {
-	return ""
+func (a *aff) allowed(*url.URL) (string, bool) {
+	return "", false
 }

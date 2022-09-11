@@ -27,6 +27,6 @@ func (*short) handle(s *Stage) string {
 	return loc.String()
 }
 
-func (*short) allowed(*url.URL) string {
-	return ""
+func (*short) allowed(*url.URL) (string, bool) {
+	return "", false
 }
