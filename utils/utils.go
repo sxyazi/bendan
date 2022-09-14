@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -12,6 +13,10 @@ import (
 	"strings"
 	"time"
 )
+
+func Value[T any](first T, rest ...any) T {
+	return first
+}
 
 func LinkedName(user *tgbotapi.User) string {
 	var lastName = user.LastName
@@ -51,7 +56,7 @@ func CreateBot() *tgbotapi.BotAPI {
 		log.Panic(err)
 	}
 
-	bot.Debug = true
+	bot.Debug = false
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 	return bot
 }
@@ -118,6 +123,9 @@ func NewClient() *http.Client {
 
 var Client = NewClient()
 
+var reRefreshMeta = regexp.MustCompile(`(?im)<meta\s.*?http-equiv\s*=\s*['"\s]*?refresh['"\s]*?.*?>`)
+var reRefreshUrl = regexp.MustCompile(`(?i);\s*URL=(.+?)['"\s]`)
+
 func SeekLocation(u *url.URL) *url.URL {
 	// Set up the request
 	req, err := http.NewRequest("GET", u.String(), nil)
@@ -131,11 +139,27 @@ func SeekLocation(u *url.URL) *url.URL {
 	if err != nil {
 		return nil
 	}
-	resp.Body.Close()
+	defer resp.Body.Close()
 
-	parsed, err := url.Parse(resp.Header.Get("Location"))
-	if err != nil || parsed.String() == u.String() {
+	// Check if the response is a redirect
+	if l := resp.Header.Get("Location"); l != "" {
+		parsed, err := url.Parse(l)
+		if err == nil && parsed.String() != u.String() {
+			return parsed
+		}
 		return nil
 	}
-	return parsed
+
+	// Check if the response is a meta refresh
+	m := reRefreshMeta.FindSubmatch(Value(io.ReadAll(resp.Body)))
+	if len(m) < 1 {
+		return nil
+	} else if m = reRefreshUrl.FindSubmatch(m[0]); len(m) < 2 {
+		return nil
+	} else if parsed, err := url.Parse(string(m[1])); err != nil {
+		return nil
+	} else if parsed.String() != u.String() {
+		return parsed
+	}
+	return nil
 }
