@@ -94,17 +94,17 @@ func (t tracks) Do(s *Stage) *url.URL {
 			s.matches = matches
 			s.Url = v.handle(s)
 		}
-
-		// do purify for the queries of the rest recursively
-		qs = s.Url.Query()
-		for _, q := range qs {
-			for i, v := range q {
-				q[i] = t.do(v)
-			}
-		}
-		s.Url.RawQuery = qs.Encode()
 		break
 	}
+
+	// do purify for the queries of the rest recursively
+	qs := s.Url.Query()
+	for _, q := range qs {
+		for i, v := range q {
+			q[i] = t.do(v)
+		}
+	}
+	s.Url.RawQuery = qs.Encode()
 
 	// if there fragment is still being, purify it recursively
 	if s.Url.Fragment != "" {

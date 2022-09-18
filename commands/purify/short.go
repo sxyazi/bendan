@@ -32,7 +32,7 @@ func (*short) match(u *url.URL) []string {
 func (*short) handle(s *Stage) *url.URL {
 	loc := utils.SeekLocation(s.Url)
 	if loc == nil {
-		return s.Url
+		loc = s.Url
 	}
 
 	return Tracks.Do(&Stage{Deep: s.Deep, Url: loc})
