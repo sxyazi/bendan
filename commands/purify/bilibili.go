@@ -19,9 +19,9 @@ func (b *bilibili) match(u *url.URL) []string {
 	return reBilibiliAV.FindStringSubmatch(u.String())
 }
 
-func (b *bilibili) handle(s *Stage) string {
-	s.url.Path = "/video/" + b.bvToAv(s.matches[1])
-	return s.url.String()
+func (b *bilibili) handle(s *Stage) *url.URL {
+	s.Url.Path = "/video/" + b.bvToAv(s.matches[1])
+	return s.Url
 }
 
 func (b *bilibili) allowed(u *url.URL) (string, bool) {

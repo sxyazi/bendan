@@ -6,57 +6,112 @@ import (
 
 type tracks []interface {
 	match(*url.URL) []string
-	handle(*Stage) string
+	handle(*Stage) *url.URL
 	allowed(*url.URL) (string, bool)
 }
 
 type Stage struct {
-	idx     int
-	deep    int
-	orig    string
-	url     *url.URL
+	Deep int
+	Url  *url.URL
+
 	matches []string
 }
 
-func (t tracks) Test(u *url.URL) *Stage {
-	orig := u.String()
+func (t tracks) test(s string) int {
+	if u, err := url.Parse(s); err == nil {
+		return t.Test(u)
+	}
+	return -1
+}
+
+func (t tracks) Test(u *url.URL) int {
 	for i, v := range t {
-		matches := v.match(u)
-		if len(matches) < 1 {
+		if len(v.match(u)) < 1 {
 			continue
 		}
 
 		allowed, stop := v.allowed(u)
 		removal := validExpr(u, parseExpr(allowed))
 
-		qs := u.Query()
-		for _, r := range removal {
-			qs.Del(r)
-		}
-		u.RawQuery = qs.Encode()
-
 		if !stop {
-			return &Stage{i, 0, orig, u, matches}
+			return i
 		} else if len(removal) > 0 {
-			return &Stage{-1, 0, orig, u, matches}
+			return 1 << 20
 		}
 	}
-	return nil
+
+	// test the part of url as a fragment
+	if u.Fragment != "" {
+		if r := t.test(u.Fragment); r >= 0 {
+			return r
+		}
+	}
+
+	// test for sub queries at all
+	for _, q := range u.Query() {
+		for _, v := range q {
+			if r := t.test(v); r >= 0 {
+				return r
+			}
+		}
+	}
+	return -1
 }
 
-func (t tracks) Do(s *Stage) string {
-	if s == nil {
-		return ""
-	} else if s.idx == -1 {
-		return s.url.String()
+func (t tracks) do(s string) string {
+	u, err := url.Parse(s)
+	if err != nil {
+		return s
+	} else if u = t.Do(&Stage{Url: u}); u != nil {
+		return u.String()
+	}
+	return s
+}
+
+func (t tracks) Do(s *Stage) *url.URL {
+	s.Deep++
+	if s.Deep > 5 {
+		return nil // avoid infinite loop
 	}
 
-	s.deep++
-	if s.deep > 5 {
-		return "" // avoid infinite loop
+	for _, v := range t {
+		matches := v.match(s.Url)
+		if len(matches) < 1 {
+			continue
+		}
+
+		// remove the queries that are not allowed
+		qs := s.Url.Query()
+		allowed, stop := v.allowed(s.Url)
+		removal := validExpr(s.Url, parseExpr(allowed))
+		for _, k := range removal {
+			qs.Del(k)
+		}
+		s.Url.RawQuery = qs.Encode()
+
+		// handle the url with called the custom handler
+		if !stop {
+			s.matches = matches
+			s.Url = v.handle(s)
+		}
+
+		// do purify for the queries of the rest recursively
+		qs = s.Url.Query()
+		for _, q := range qs {
+			for i, v := range q {
+				q[i] = t.do(v)
+			}
+		}
+		s.Url.RawQuery = qs.Encode()
+		break
 	}
 
-	return t[s.idx].handle(s)
+	// if there fragment is still being, purify it recursively
+	if s.Url.Fragment != "" {
+		s.Url.Fragment = t.do(s.Url.Fragment)
+	}
+
+	return s.Url
 }
 
 var Tracks = tracks{}

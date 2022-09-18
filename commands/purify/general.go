@@ -38,19 +38,19 @@ var reGeneral = regexp.MustCompile(`(?i)\b(` + strings.Join(generalParams, "|") 
 type general struct{}
 
 func (*general) match(u *url.URL) []string {
-	return reGeneral.FindStringSubmatch(u.String())
+	return reGeneral.FindStringSubmatch(u.RawQuery)
 }
 
-func (*general) handle(s *Stage) string {
-	qs := s.url.Query()
+func (*general) handle(s *Stage) *url.URL {
+	qs := s.Url.Query()
 	for name := range qs {
 		if reGeneral.MatchString(name) {
 			qs.Del(name)
 		}
 	}
 
-	s.url.RawQuery = qs.Encode()
-	return s.url.String()
+	s.Url.RawQuery = qs.Encode()
+	return s.Url
 }
 
 func (*general) allowed(*url.URL) (string, bool) {

@@ -29,17 +29,13 @@ func (*short) match(u *url.URL) []string {
 	}
 }
 
-func (*short) handle(s *Stage) string {
-	loc := utils.SeekLocation(s.url)
+func (*short) handle(s *Stage) *url.URL {
+	loc := utils.SeekLocation(s.Url)
 	if loc == nil {
-		return ""
+		return s.Url
 	}
 
-	if t := Tracks.Test(loc); t != nil {
-		t.deep = s.deep
-		return Tracks.Do(t)
-	}
-	return loc.String()
+	return Tracks.Do(&Stage{Deep: s.Deep, Url: loc})
 }
 
 func (*short) allowed(*url.URL) (string, bool) {

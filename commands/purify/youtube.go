@@ -13,8 +13,11 @@ func (*youtube) match(u *url.URL) []string {
 	return reYoutube.FindStringSubmatch(u.String())
 }
 
-func (*youtube) handle(s *Stage) string {
-	return "https://www.youtube.com/watch?v=" + s.matches[1]
+func (*youtube) handle(s *Stage) *url.URL {
+	if u, err := url.Parse("https://www.youtube.com/watch?v=" + s.matches[1]); err == nil {
+		return u
+	}
+	return s.Url
 }
 
 func (*youtube) allowed(*url.URL) (string, bool) {
