@@ -8,6 +8,7 @@ import (
 )
 
 var all = []func(*tgbotapi.Message) bool{
+	Mark,
 	Pin,
 	Me,
 	Call,
