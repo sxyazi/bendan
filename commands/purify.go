@@ -12,7 +12,7 @@ import (
 func Purify(msg *tgbotapi.Message) bool {
 	urls := utils.ExtractUrls(msg.Text + "\n" + msg.Caption)
 	if len(urls) < 1 {
-		return true
+		return false
 	}
 
 	todo := make([]*url.URL, 0, len(urls))
@@ -22,7 +22,7 @@ func Purify(msg *tgbotapi.Message) bool {
 		}
 	}
 	if len(todo) < 1 {
-		return true
+		return false
 	}
 
 	wg := sync.WaitGroup{}

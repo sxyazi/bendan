@@ -13,6 +13,7 @@ var all = []func(*tgbotapi.Message) bool{
 	Me,
 	Call,
 	Purify,
+	Yes,
 }
 
 var Bot *tgbotapi.BotAPI
