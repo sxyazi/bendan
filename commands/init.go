@@ -11,6 +11,7 @@ var all = []func(*tgbotapi.Message) bool{
 	Mark,
 	Pin,
 	Me,
+	Eval,
 	Call,
 	Purify,
 	Yes,
