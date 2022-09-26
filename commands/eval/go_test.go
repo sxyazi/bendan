@@ -1,6 +1,7 @@
 package eval
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -19,11 +20,15 @@ func add(a, b int) int {
 func main() {
 	fmt.Print(add(1, 2))
 }
-`, "3"},
+		`, "3"},
+		{`
+rand.Seed(33)
+fmt.Print(rand.Intn(10))
+`, "4"},
 	}
 
 	for _, d := range data {
-		if got := NewGo().Eval(d.input); got != d.want {
+		if got := NewGo().Eval(d.input); strings.Join(got, "") != d.want {
 			t.Errorf("Eval(%q) = %q, want %q", d.input, got, d.want)
 		}
 	}

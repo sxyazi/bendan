@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"bytes"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sxyazi/bendan/commands/eval"
 	"regexp"
@@ -15,13 +16,13 @@ func Eval(msg *tgbotapi.Message) bool {
 		return false
 	}
 
-	result := make(chan string, 1)
+	result := make(chan []string, 1)
 	go func() {
 		switch strings.ToLower(matches[1]) {
 		case "go", "golang":
 			result <- eval.NewGo().Eval(matches[2])
 		default:
-			result <- "Unknown language"
+			result <- []string{"Unknown language"}
 		}
 	}()
 
@@ -30,6 +31,12 @@ func Eval(msg *tgbotapi.Message) bool {
 		return true
 	}
 
-	EditText(sent, <-result)
+	var buf bytes.Buffer
+	for _, s := range <-result {
+		buf.WriteString(`<code>`)
+		buf.WriteString(s)
+		buf.WriteString(`</code>`)
+	}
+	EditText(sent, buf.String())
 	return true
 }
