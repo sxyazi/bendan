@@ -40,6 +40,13 @@ type nodeResult struct {
 
 var reNodeComment = regexp.MustCompile(`/(?m)\*[\s\S]*?\*/|([^\\:]|^)//.*$`)
 var reNodeString = regexp.MustCompile(`'[^']+'|"[^"]+"|` + "`[^`]*`")
+var reNodeNonExpr = regexp.MustCompile(strings.Join([]string{
+	`(do|try)\s*{`,
+	`^(console)\.[a-z]+\(`,
+	`(if|for|with|while|switch|for\s+await)\s*\(`,
+	`(var|let|const|class|function|function\s*\*|async\s+function)\s+[a-zA-Z$][a-zA-Z0-9$]*`,
+	`async\s+function\s*\*\s*[a-zA-Z$][a-zA-Z0-9$]*`,
+}, "|"))
 
 func (n *Node) compile(code, nonce string) string {
 	noComment := strings.TrimSpace(reNodeComment.ReplaceAllString(code, ""))
@@ -47,7 +54,7 @@ func (n *Node) compile(code, nonce string) string {
 		return code
 	}
 	noString := reNodeString.ReplaceAllString(noComment, "")
-	if strings.Contains(noString, ";") || strings.HasPrefix(noString, "console.") {
+	if strings.Contains(noString, ";") || reNodeNonExpr.MatchString(noString) {
 		return code
 	}
 
@@ -58,7 +65,7 @@ func (n *Node) compile(code, nonce string) string {
 	buf.WriteString(nonce)
 	buf.WriteString(`',`)
 	buf.WriteString(noComment)
-	buf.WriteString(`)`)
+	buf.WriteString(`);`)
 	return buf.String()
 }
 
@@ -102,6 +109,10 @@ func (n *Node) Eval(code string) []string {
 	}
 
 	if result.Stderr != "" {
+		if strings.Contains(result.Stderr, nonce) {
+			r := regexp.MustCompile(fmt.Sprintf(`console\.log\('%s');console\.log\('%s',(.+));`, nonce, nonce))
+			result.Stderr = r.ReplaceAllString(result.Stderr, "$1")
+		}
 		return []string{result.Stderr}
 	} else if !strings.Contains(result.Stdout, nonce) {
 		return []string{result.Stdout}

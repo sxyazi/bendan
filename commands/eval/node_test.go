@@ -16,6 +16,7 @@ func TestNode_Eval(t *testing.T) {
 		{`'hello;world'`, "hello;world\n"},
 		{`console.log('foo');console.log('bar')`, "foo\nbar\n"},
 		{`'foo\n' + console.log('bar')`, "bar\nfoo\nundefined\n"},
+		{`if (1+1) console.log('true')`, "true\n"},
 	}
 
 	for _, d := range data {
