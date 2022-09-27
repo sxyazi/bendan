@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var reEval = regexp.MustCompile(`(?mi)^//\s*(go|golang)[\s\n]+(.+)$`)
+var reEval = regexp.MustCompile(`(?mi)^//\s*(go|golang)[\s\n]+([\s\S]+)`)
 
 func Eval(msg *tgbotapi.Message) bool {
 	matches := reEval.FindStringSubmatch(msg.Text)
@@ -33,10 +33,18 @@ func Eval(msg *tgbotapi.Message) bool {
 
 	var buf bytes.Buffer
 	for _, s := range <-result {
+		if s == "" {
+			continue
+		}
 		buf.WriteString(`<code>`)
 		buf.WriteString(s)
 		buf.WriteString(`</code>`)
 	}
+
+	if buf.Len() == 0 {
+		buf.WriteString("No output")
+	}
+
 	EditText(sent, buf.String())
 	return true
 }

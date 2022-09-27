@@ -79,12 +79,15 @@ func (g *Go) Eval(code string) []string {
 
 	// Parse the response
 	var result goResult
-	if err := json.Unmarshal(b, &result); err != nil {
+	if err = json.Unmarshal(b, &result); err != nil {
 		return []string{"Error: " + err.Error()}
 	}
 
 	// Check for errors
 	if result.Errors != "" {
+		if strings.Contains(result.Errors, " (no value) used as value") {
+			return nil
+		}
 		return []string{result.Errors}
 	}
 

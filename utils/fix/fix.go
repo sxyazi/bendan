@@ -6,6 +6,7 @@ import (
 	"go/parser"
 	"go/token"
 	"path"
+	"strconv"
 )
 
 type visitFn func(node ast.Node) ast.Visitor
@@ -85,8 +86,20 @@ func Imports(code string) string {
 		return code
 	}
 
+	occur := map[string]struct{}{}
+	for _, i := range f.Imports {
+		if i.Name != nil {
+			occur[i.Name.Name] = struct{}{}
+		} else if u, err := strconv.Unquote(i.Path.Value); err == nil {
+			occur[path.Base(u)] = struct{}{}
+		}
+	}
+
 	var buf bytes.Buffer
 	for left, right := range collectReferences(f) {
+		if _, ok := occur[left]; ok {
+			continue
+		}
 		if s := match(left, right); s != "" {
 			buf.WriteString(`import"`)
 			buf.WriteString(match(left, right))
