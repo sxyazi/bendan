@@ -110,7 +110,7 @@ func (n *Node) Eval(code string) []string {
 
 	if result.Stderr != "" {
 		if strings.Contains(result.Stderr, nonce) {
-			r := regexp.MustCompile(fmt.Sprintf(`console\.log\('%s');console\.log\('%s',(.+));`, nonce, nonce))
+			r := regexp.MustCompile(fmt.Sprintf(`console\.log\('%s'\);console\.log\('%s',(.+)\);`, nonce, nonce))
 			result.Stderr = r.ReplaceAllString(result.Stderr, "$1")
 		}
 		return []string{result.Stderr}
