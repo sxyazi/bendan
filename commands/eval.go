@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-var reEval = regexp.MustCompile(`(?mi)^//\s*(go|golang)[\s\n]+([\s\S]+)`)
+var reEval = regexp.MustCompile(`(?mi)^//\s*(go|golang|js|javascript|node|nodejs)[\s\n]+([\s\S]+)`)
 
 func Eval(msg *tgbotapi.Message) bool {
 	matches := reEval.FindStringSubmatch(msg.Text)
@@ -21,6 +21,8 @@ func Eval(msg *tgbotapi.Message) bool {
 		switch strings.ToLower(matches[1]) {
 		case "go", "golang":
 			result <- eval.NewGo().Eval(matches[2])
+		case "js", "javascript", "node", "nodejs":
+			result <- eval.NewNode().Eval(matches[2])
 		default:
 			result <- []string{"Unknown language"}
 		}
