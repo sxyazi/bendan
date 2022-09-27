@@ -3,14 +3,12 @@ package eval
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/sxyazi/bendan/utils/fix"
 	"go/parser"
-	"go/token"
-	"golang.org/x/tools/imports"
 	"io"
 	"net/http"
 	"net/url"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -28,46 +26,6 @@ type goResult struct {
 var reGoFnEntry = regexp.MustCompile(`func\s+main\s*\(\s*\)\s*{(?:\s|\b)`)
 var reGoPackEntry = regexp.MustCompile(`package\s+main\s*(?:;|$)`)
 var reGoComment = regexp.MustCompile(`(?m)^\s*//.*$`)
-
-func (g *Go) imp(code []byte) map[string]struct{} {
-	f, err := parser.ParseFile(token.NewFileSet(), "", code, 0)
-	if err != nil {
-		return map[string]struct{}{}
-	}
-
-	m := make(map[string]struct{}, len(f.Imports))
-	for _, i := range f.Imports {
-		if u, err := strconv.Unquote(i.Path.Value); err == nil {
-			m[u] = struct{}{}
-		}
-	}
-	return m
-}
-
-func (g *Go) fix(code string) string {
-	var offset int
-	if m := reGoPackEntry.FindStringIndex(code); len(m) < 2 {
-		return code
-	} else {
-		offset = m[1]
-	}
-
-	b, err := imports.Process("", []byte(code), nil)
-	if err != nil {
-		return code
-	}
-
-	imp := g.imp([]byte(code))
-	buf := bytes.NewBufferString(code[:offset])
-	for i := range g.imp(b) {
-		if _, ok := imp[i]; !ok {
-			buf.WriteString(`import"` + i + `";`)
-		}
-	}
-
-	buf.WriteString(code[offset:])
-	return buf.String()
-}
 
 func (g *Go) compile(code string) string {
 	// Check if the code is an expression
@@ -93,7 +51,10 @@ func (g *Go) compile(code string) string {
 	}
 
 	// Add imports for all the packages used
-	return g.fix(buf.String())
+	if s := fix.Imports(buf.String()); s != "" {
+		return reGoPackEntry.ReplaceAllString(buf.String(), "${0}"+s)
+	}
+	return buf.String()
 }
 
 func (g *Go) Eval(code string) []string {
