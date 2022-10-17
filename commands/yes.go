@@ -2,38 +2,43 @@ package commands
 
 import (
 	"crypto/sha1"
-	"encoding/binary"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sxyazi/bendan/commands/yes"
-	"math/bits"
 	"math/rand"
 )
 
-func Yes(msg *tgbotapi.Message) bool {
-	token := yes.Tokenize(msg.Text)
+func yes_sel(a [2][]string, t *yes.Token) string {
+	var s []string
+	if rand.Float64() > .9 {
+		s = a[rand.Int()&1]
+	} else {
+		s = a[sha1.Sum([]byte(t.String()))[0]&1]
+	}
+	return s[rand.Intn(len(s))]
+}
+
+func YesOk(msg *tgbotapi.Message) bool {
+	token := yes.OkTokenize(msg.Text)
 	if token == nil {
 		return false
 	}
 
-	var certain bool
-	if rand.Float64() > .9 {
-		certain = rand.Int()%10 >= 4
-	} else {
-		a := sha1.Sum([]byte(token.String()))
-		certain = bits.OnesCount64(binary.BigEndian.Uint64(a[:])) > 32
-	}
+	text := yes_sel([2][]string{{"行", "行的", "我觉得行"}, {"不行", "不行的", "我觉得不行"}}, token)
+	SendText(msg.Chat.ID, text)
 
-	sel := func(a [2]string) string {
-		if certain {
-			return a[0]
-		}
-		return a[1]
+	return true
+}
+
+func YesIs(msg *tgbotapi.Message) bool {
+	token := yes.IsTokenize(msg.Text)
+	if token == nil {
+		return false
 	}
 
 	if token.Ind == "" {
-		SendText(msg.Chat.ID, sel([...]string{"是", "不是"}))
+		SendText(msg.Chat.ID, yes_sel([2][]string{{"是", "是的"}, {"不是"}}, token))
 	} else {
-		SendText(msg.Chat.ID, sel([...]string{token.Ind, token.Obj}))
+		SendText(msg.Chat.ID, yes_sel([2][]string{{token.Ind}, {token.Obj}}, token))
 	}
 
 	return true

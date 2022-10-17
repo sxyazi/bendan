@@ -14,7 +14,8 @@ var all = []func(*tgbotapi.Message) bool{
 	Eval,
 	Call,
 	Purify,
-	Yes,
+	YesOk,
+	YesIs,
 }
 
 var Bot *tgbotapi.BotAPI
