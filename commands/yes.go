@@ -17,27 +17,6 @@ func yes_sel(a [2][]string, t *yes.Token) string {
 	return s[rand.Intn(len(s))]
 }
 
-func YesLook(msg *tgbotapi.Message) bool {
-	token := yes.LookTokenize(msg.Text)
-	if token == nil {
-		return false
-	}
-
-	if rand.Float64() > .9 {
-		opt := []string{"看看你的", "can can need"}
-		ReplyText(msg, opt[rand.Intn(len(opt))])
-		return true
-	}
-
-	text := yes_sel([2][]string{{"看看", "想看"}, {"窝也想看", "想看，gkd"}}, token)
-	if msg.ReplyToMessage == nil {
-		SendText(msg.Chat.ID, text)
-	} else {
-		ReplyText(msg.ReplyToMessage, text)
-	}
-	return true
-}
-
 func YesOk(msg *tgbotapi.Message) bool {
 	token := yes.OkTokenize(msg.Text)
 	if token == nil {
@@ -96,5 +75,26 @@ func YesIs(msg *tgbotapi.Message) bool {
 	}
 
 	SendText(msg.Chat.ID, yes_sel(opt, token))
+	return true
+}
+
+func YesLook(msg *tgbotapi.Message) bool {
+	token := yes.LookTokenize(msg.Text)
+	if token == nil {
+		return false
+	}
+
+	if rand.Float64() > .9 {
+		opt := []string{"看看你的", "can can need"}
+		ReplyText(msg, opt[rand.Intn(len(opt))])
+		return true
+	}
+
+	text := yes_sel([2][]string{{"看看", "想看"}, {"窝也想看", "想看，gkd"}}, token)
+	if msg.ReplyToMessage == nil {
+		SendText(msg.Chat.ID, text)
+	} else {
+		ReplyText(msg.ReplyToMessage, text)
+	}
 	return true
 }

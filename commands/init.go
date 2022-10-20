@@ -14,10 +14,10 @@ var all = []func(*tgbotapi.Message) bool{
 	Eval,
 	Call,
 	Purify,
-	YesLook,
 	YesOk,
 	YesCanWill,
 	YesIs,
+	YesLook,
 }
 
 var Bot *tgbotapi.BotAPI
