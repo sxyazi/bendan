@@ -11,7 +11,7 @@ func LookTokenize(s string) *Token {
 	for i := len(ps) - 1; i >= 0; i-- {
 		ms := reLook.FindStringSubmatch(s)
 		if ms != nil {
-			return &Token{Typ: TypLook, Obj: ms[2], Word: regexp.MustCompile(`\s+`).ReplaceAllString(ms[1], "")}
+			return &Token{Typ: TypLook, Obj: ms[2], Word: "看看"}
 		}
 	}
 
