@@ -14,7 +14,9 @@ var all = []func(*tgbotapi.Message) bool{
 	Eval,
 	Call,
 	Purify,
+	YesLook,
 	YesOk,
+	YesCanWill,
 	YesIs,
 }
 

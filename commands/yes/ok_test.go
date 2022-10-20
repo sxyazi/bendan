@@ -1,6 +1,8 @@
 package yes
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestOkTokenize(t *testing.T) {
 	var data = []struct {

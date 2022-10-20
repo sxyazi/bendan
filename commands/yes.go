@@ -17,6 +17,27 @@ func yes_sel(a [2][]string, t *yes.Token) string {
 	return s[rand.Intn(len(s))]
 }
 
+func YesLook(msg *tgbotapi.Message) bool {
+	token := yes.LookTokenize(msg.Text)
+	if token == nil {
+		return false
+	}
+
+	if rand.Float64() > .9 {
+		opt := []string{"看看你的", "can can need"}
+		ReplyText(msg, opt[rand.Intn(len(opt))])
+		return true
+	}
+
+	text := yes_sel([2][]string{{"看看", "想看"}, {"窝也想看", "想看，gkd"}}, token)
+	if msg.ReplyToMessage == nil {
+		SendText(msg.Chat.ID, text)
+	} else {
+		ReplyText(msg.ReplyToMessage, text)
+	}
+	return true
+}
+
 func YesOk(msg *tgbotapi.Message) bool {
 	token := yes.OkTokenize(msg.Text)
 	if token == nil {
@@ -29,17 +50,51 @@ func YesOk(msg *tgbotapi.Message) bool {
 	return true
 }
 
+func YesCanWill(msg *tgbotapi.Message) bool {
+	token := yes.CanWillTokenize(msg.Text)
+	if token == nil {
+		return false
+	}
+
+	var text string
+	if token.Typ == yes.TypWill {
+		text = yes_sel([2][]string{{"会", "会！", "会的"}, {"不会", "不会！", "不会啊"}}, token)
+	} else {
+		text = yes_sel([2][]string{{"能", "能！"}, {"不能", "不能！", "不，你不能"}}, token)
+	}
+
+	SendText(msg.Chat.ID, text)
+	return true
+}
+
 func YesIs(msg *tgbotapi.Message) bool {
 	token := yes.IsTokenize(msg.Text)
 	if token == nil {
 		return false
 	}
 
-	if token.Ind == "" {
-		SendText(msg.Chat.ID, yes_sel([2][]string{{"是", "是的"}, {"不是"}}, token))
-	} else {
-		SendText(msg.Chat.ID, yes_sel([2][]string{{token.Ind}, {token.Obj}}, token))
+	// TypIsAB/TypeHaveAB
+	if token.Ind != "" {
+		SendText(msg.Chat.ID, yes_sel([2][]string{{token.Ind, token.Ind + "！"}, {token.Obj, token.Obj + "！"}}, token))
+		return true
 	}
 
+	var opt [2][]string
+	switch token.Typ {
+	case yes.TypIsYes: // 是X吗
+		opt = [2][]string{{"是", "是的"}, {"不是", "不是啊"}}
+	case yes.TypHaveYes: // 有X吗
+		opt = [2][]string{{"有", "有的"}, {"没有", "没有啊"}}
+	case yes.TypIsYesNo: // 是不是X
+		opt = [2][]string{{"对", "是", "是的"}, {"不是", "不是啊"}}
+	case yes.TypHaveYesNo: // 有没有X
+		opt = [2][]string{{"有", "有的", "有啊"}, {"没有", "没有啊", "并没有"}}
+	case yes.TypHaveSo: // 这么有X
+		opt = [2][]string{{"是的"}, {"确实有" + token.Obj, "确实是有" + token.Obj}}
+	default:
+		return false
+	}
+
+	SendText(msg.Chat.ID, yes_sel(opt, token))
 	return true
 }

@@ -12,7 +12,7 @@ func OkTokenize(s string) *Token {
 	for i := len(parts) - 1; i >= 0; i-- {
 		matches := reOkOrNot.FindStringSubmatch(s)
 		if len(matches) > 1 {
-			return &Token{Typ: 3, Sub: matches[1]}
+			return &Token{Typ: TypOk, Sub: matches[1]}
 		}
 	}
 

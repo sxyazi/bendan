@@ -1,12 +1,15 @@
 package yes
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestIsTokenize(t *testing.T) {
 	var data = []struct {
 		input string
 		want  string
 	}{
+		// IS
 		{"你是谁", ""},
 		{"你是谁吗", "sub=你, obj=谁"},
 		{"你是谁吗?", "sub=你, obj=谁"},
@@ -25,15 +28,20 @@ func TestIsTokenize(t *testing.T) {
 		{"X是不是在自慰", "sub=X, obj=在自慰"},
 		{"X是幼女嘛，还是  我编不下去了", "sub=X, obj=幼女, ind=我编不下去了"},
 
-		{input: "你是那个？", want: "sub=你, obj=那个"},
-		{input: "你是用XX还是啥嘛", want: "sub=你, obj=用XX"},
+		{"你是那个？", "sub=你, obj=那个"},
+		{"你是用XX还是啥嘛", "sub=你, obj=用XX"},
 		{"你是谁是谁，还是你是你", "sub=你, obj=谁是谁, ind=你是你"},
-		{input: "但是我是不是傻", want: "sub=我, obj=傻"},
+		{"但是我是不是傻", "sub=我, obj=傻"},
 
-		{input: "日本是哪啊？", want: ""},
-		{input: "我的评价是：别尬黑好吧", want: ""},
-		{input: "但是AA还是个BB", want: ""},
-		{input: "想XX但是不敢！", want: ""},
+		{"日本是哪啊？", ""},
+		{"我的评价是：别尬黑好吧", ""},
+		{"但是AA还是个BB", ""},
+		{"想XX但是不敢！", ""},
+
+		// HAVE
+		{"有无小裙子", "sub=, obj=小裙子"},
+		{"你有没有看到他", "sub=你, obj=看到他"},
+		{"这么有钱？", "sub=, obj=钱"},
 	}
 
 	for _, d := range data {
