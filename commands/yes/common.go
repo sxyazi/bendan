@@ -2,29 +2,31 @@ package yes
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
 const (
 	TypIs = iota
 	TypHave
-	TypIsEnd
-	TypHaveEnd
 	TypIsAB
 	TypHaveAB
 	TypIsYesNo
 	TypHaveYesNo
 	TypHaveSo
 
-	TypOk
-
+	TypRight
 	TypCan
-	TypWill
-
 	TypLook
 
 	TypUnknown
 )
+
+const marks = `[啊阿呀吗嘛吧呢捏罢,.?!;，。？！；]`
+
+var reClause = regexp.MustCompile(`.+?\s*(?:[,.?!:;()，。？！：；（）]+|$)`)
+var reDeterminer = regexp.MustCompile(`^(啥|甚|什么|什麽|什麼|哪个|哪样|哪)`)
+var reConjunction = regexp.MustCompile(`^(虽然|但是|然而|偏偏|只是|不过|至于|那么|原来|因为|由于|因此|所以|或者|如果|假如|只要|除非|倘若|即使|要是|似乎|不如|不及|尽管|而且|况且|以免|为了|于是|然后|此外|接着|应该)`)
 
 type Token struct {
 	Typ  uint8
@@ -63,4 +65,15 @@ func explode(s string) []string {
 		ps = ps[:i]
 	}
 	return ps
+}
+
+func rmRec(s string, re *regexp.Regexp) string {
+	for s != "" {
+		if old, r := s, re.ReplaceAllString(s, ""); r != old {
+			s = r
+		} else {
+			break
+		}
+	}
+	return s
 }

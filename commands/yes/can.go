@@ -5,20 +5,20 @@ import (
 	"regexp"
 )
 
-var reWillOrNot = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*(会\s*不\s*会)\s*(.*?)(?:%s+|$)`, marks))
-var reCanOrNot = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*(能\s*不\s*能)\s*(.*?)(?:%s+|$)`, marks))
+var reCan1 = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*(能不能|会不会)\s*(.*?)(?:%s+|$)`, marks))
+var reCan2 = regexp.MustCompile(`\s*(.*?)\s*([能会][吗嘛吧罢])\s*[.?。？]*\s*$`)
 
-func CanWillTokenize(s string) *Token {
+func CanTokenize(s string) *Token {
 	ps := explode(s)
 	for i := len(ps) - 1; i >= 0; i-- {
-		ms := reWillOrNot.FindStringSubmatch(s)
-		if len(ms) > 2 {
-			return &Token{Typ: TypWill, Sub: ms[1], Obj: ms[3], Word: regexp.MustCompile(`\s+`).ReplaceAllString(ms[2], "")}
+		ms := reCan1.FindStringSubmatch(s)
+		if ms != nil {
+			return &Token{Typ: TypCan, Sub: ms[1], Obj: ms[3], Word: ms[2]}
 		}
 
-		ms = reCanOrNot.FindStringSubmatch(s)
-		if len(ms) > 2 {
-			return &Token{Typ: TypCan, Sub: ms[1], Obj: ms[3], Word: regexp.MustCompile(`\s+`).ReplaceAllString(ms[2], "")}
+		ms = reCan2.FindStringSubmatch(s)
+		if ms != nil {
+			return &Token{Typ: TypCan, Sub: ms[1], Word: ms[2]}
 		}
 	}
 

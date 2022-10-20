@@ -7,6 +7,7 @@ func TestCanTokenize(t *testing.T) {
 		input string
 		want  string
 	}{
+		{"能吗", "sub="},
 		{"A能不能B？", "sub=A, obj=B"},
 		{"能不能X呢？", "sub=, obj=X"},
 
@@ -16,8 +17,8 @@ func TestCanTokenize(t *testing.T) {
 	}
 
 	for _, d := range data {
-		if got := CanWillTokenize(d.input); got.String() != d.want {
-			t.Errorf("CanWillTokenize(%q) = %q, want %q", d.input, got, d.want)
+		if got := CanTokenize(d.input); got.String() != d.want {
+			t.Errorf("CanTokenize(%q) = %q, want %q", d.input, got, d.want)
 		}
 	}
 }
