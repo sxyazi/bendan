@@ -18,18 +18,29 @@ func yes_sel(a [2][]string, t *yes.Token) string {
 }
 
 func YesOk(msg *tgbotapi.Message) bool {
+	if msg.ForwardFromChat != nil && msg.ForwardFromChat.IsChannel() {
+		return false
+	}
+
 	token := yes.OkTokenize(msg.Text)
 	if token == nil {
 		return false
 	}
 
 	text := yes_sel([2][]string{{"行", "行的", "我觉得行"}, {"不行", "不行的", "我觉得不行"}}, token)
-	SendText(msg.Chat.ID, text)
-
+	if len(msg.Text) > 50 {
+		ReplyText(msg, text)
+	} else {
+		SendText(msg.Chat.ID, text)
+	}
 	return true
 }
 
 func YesCanWill(msg *tgbotapi.Message) bool {
+	if msg.ForwardFromChat != nil && msg.ForwardFromChat.IsChannel() {
+		return false
+	}
+
 	token := yes.CanWillTokenize(msg.Text)
 	if token == nil {
 		return false
@@ -42,11 +53,19 @@ func YesCanWill(msg *tgbotapi.Message) bool {
 		text = yes_sel([2][]string{{"能", "能！"}, {"不能", "不能！", "不，你不能"}}, token)
 	}
 
-	SendText(msg.Chat.ID, text)
+	if len(msg.Text) > 50 {
+		ReplyText(msg, text)
+	} else {
+		SendText(msg.Chat.ID, text)
+	}
 	return true
 }
 
 func YesIs(msg *tgbotapi.Message) bool {
+	if msg.ForwardFromChat != nil && msg.ForwardFromChat.IsChannel() {
+		return false
+	}
+
 	token := yes.IsTokenize(msg.Text)
 	if token == nil {
 		return false
@@ -65,7 +84,7 @@ func YesIs(msg *tgbotapi.Message) bool {
 	case yes.TypHaveYes: // 有X吗
 		opt = [2][]string{{"有", "有的"}, {"没有", "没有啊"}}
 	case yes.TypIsYesNo: // 是不是X
-		opt = [2][]string{{"对", "是", "是的"}, {"不是", "不是啊"}}
+		opt = [2][]string{{"是", "是的"}, {"不是", "不是啊"}}
 	case yes.TypHaveYesNo: // 有没有X
 		opt = [2][]string{{"有", "有的", "有啊"}, {"没有", "没有啊", "并没有"}}
 	case yes.TypHaveSo: // 这么有X
@@ -74,11 +93,19 @@ func YesIs(msg *tgbotapi.Message) bool {
 		return false
 	}
 
-	SendText(msg.Chat.ID, yes_sel(opt, token))
+	if len(msg.Text) > 50 {
+		ReplyText(msg, yes_sel(opt, token))
+	} else {
+		SendText(msg.Chat.ID, yes_sel(opt, token))
+	}
 	return true
 }
 
 func YesLook(msg *tgbotapi.Message) bool {
+	if msg.ForwardFromChat != nil && msg.ForwardFromChat.IsChannel() {
+		return false
+	}
+
 	token := yes.LookTokenize(msg.Text)
 	if token == nil {
 		return false
@@ -91,7 +118,7 @@ func YesLook(msg *tgbotapi.Message) bool {
 	}
 
 	text := yes_sel([2][]string{{"看看", "想看"}, {"窝也想看", "想看，gkd"}}, token)
-	if msg.ReplyToMessage == nil {
+	if msg.ReplyToMessage == nil || len(msg.Text) <= 50 {
 		SendText(msg.Chat.ID, text)
 	} else {
 		ReplyText(msg.ReplyToMessage, text)
