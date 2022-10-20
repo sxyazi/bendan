@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-const marks = `[啊阿呀吗嘛吧呢捏,.?!;，。？！；]`
+const marks = `[啊阿呀吗嘛吧呢捏罢,.?!;，。？！；]`
 
 var reClause = regexp.MustCompile(`.+?\s*(?:[,.?!:;()，。？！：；（）]+|$)`)
 var reDeterminer = regexp.MustCompile(`^(啥|甚|什么|什麽|什麼|哪个|哪样|哪)`)
@@ -14,8 +14,8 @@ var reConjunction = regexp.MustCompile(`^(虽然|但是|然而|偏偏|只是|不
 
 var reAOrB = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*([是有])\s*(.+?)\s*%s*还是\s*(.+?)(?:%s+|$)`, marks, marks))
 var reYesOrNo = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*(是不是|是否|有没有|有木有|有无)\s*(.*?)(?:%s+|$)`, marks))
-var reHaveSo = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*(?:这\s*么|那\s*么|多\s*么)\s*有\s*(.*?)(?:%s+|$)`, marks))
-var reYes = regexp.MustCompile(fmt.Sprintf(`\s*(.*)\s*([是有])\s*(.+?)\s*%s*[吗嘛吧?!？！]+`, marks))
+var reHaveSo = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*(这\s*么|那\s*么|多\s*么)\s*有\s*(.*?)(?:%s+|$)`, marks))
+var reYes = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*((?:应该|我猜|其实|确实|大概)?[是有])\s*(.*?)\s*(%s+)`, marks))
 
 func typeOfIs(i int, s string) uint8 {
 	var typ uint8 = TypUnknown
@@ -27,13 +27,18 @@ func typeOfIs(i int, s string) uint8 {
 		}
 	case 1:
 		typ = TypIsYesNo
-		if s[:1] == "有" {
+		if strings.Contains(s, "有") {
 			typ = TypHaveYesNo
 		}
 	case 2:
-		typ = TypIsYes
-		if s == "有" {
-			return TypHaveYes
+		typ = TypIs
+		if strings.Contains(s, "有") {
+			return TypHave
+		}
+	case 3:
+		typ = TypIsEnd
+		if strings.Contains(s, "有") {
+			return TypHaveEnd
 		}
 	}
 	return typ
@@ -48,25 +53,27 @@ func matchOfIs(s string) *Token {
 		}
 
 		ms := reAOrB.FindStringSubmatch(ps[i])
-		if len(ms) > 3 {
-			return &Token{Typ: typeOfIs(0, ms[2]), Sub: ms[1], Obj: ms[3], Ind: ms[4]}
+		if len(ms) > 4 {
+			return &Token{Typ: typeOfIs(0, ms[2]), Sub: ms[1], Obj: ms[3], Ind: ms[4], Word: ms[2]}
 		}
 
 		ms = reYesOrNo.FindStringSubmatch(ps[i])
-		if len(ms) > 2 {
-			return &Token{Typ: typeOfIs(1, ms[2]), Sub: ms[1], Obj: ms[3]}
+		if len(ms) > 3 {
+			return &Token{Typ: typeOfIs(1, ms[2]), Sub: ms[1], Obj: ms[3], Word: ms[2]}
 		}
 
 		ms = reHaveSo.FindStringSubmatch(ps[i])
-		if len(ms) > 2 {
-			return &Token{Typ: TypHaveSo, Sub: ms[1], Obj: ms[2]}
+		if len(ms) > 3 {
+			return &Token{Typ: TypHaveSo, Sub: ms[1], Obj: ms[3], Word: regexp.MustCompile(`\s*`).ReplaceAllString(ms[2], "")}
 		}
 
 		ms = reYes.FindStringSubmatch(ps[i])
-		if len(ms) > 2 &&
-			!reDeterminer.MatchString(ms[1]) &&
-			!reDeterminer.MatchString(ms[2]) {
-			return &Token{Typ: typeOfIs(2, ms[2]), Sub: ms[1], Obj: ms[3]}
+		if len(ms) <= 4 || reDeterminer.MatchString(ms[1]) || reDeterminer.MatchString(ms[3]) {
+			continue
+		} else if ms[3] != "" {
+			return &Token{Typ: typeOfIs(2, ms[2]), Sub: ms[1], Obj: ms[3], Word: ms[2]}
+		} else if regexp.MustCompile(`^[吗嘛吧罢]`).MatchString(ms[4]) { // e.g. "是吧", "是吗"
+			return &Token{Typ: typeOfIs(3, ms[2]), Sub: "", Obj: ms[1], Word: ms[2]}
 		}
 	}
 	return nil
@@ -100,10 +107,9 @@ func IsTokenize(s string) *Token {
 
 	// All the objects are determiners that have undetermined, so we can't do the options, just ignore them.
 	if token.Obj == "" && token.Ind == "" &&
-		token.Typ != TypIsYesNo &&
-		token.Typ != TypHaveYesNo &&
-		token.Typ != TypHaveSo /* Since it("是否", "有无", "这么有") expects a clear Yes or No */ {
-		return nil
+		(token.Typ == TypIs || token.Typ == TypHave ||
+			token.Typ == TypIsAB || token.Typ == TypHaveAB) {
+		return nil /* Since it not expects a clear Yes or No, thus need one less non-determiner object. */
 	}
 
 	return token

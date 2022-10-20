@@ -6,8 +6,10 @@ import (
 )
 
 const (
-	TypIsYes = iota
-	TypHaveYes
+	TypIs = iota
+	TypHave
+	TypIsEnd
+	TypHaveEnd
 	TypIsAB
 	TypHaveAB
 	TypIsYesNo
@@ -25,10 +27,11 @@ const (
 )
 
 type Token struct {
-	Typ uint8
-	Sub string
-	Obj string
-	Ind string
+	Typ  uint8
+	Sub  string
+	Obj  string
+	Ind  string
+	Word string
 }
 
 func (t *Token) String() string {
@@ -43,21 +46,21 @@ func (t *Token) String() string {
 }
 
 func explode(s string) []string {
-	parts := reClause.FindAllString(s, -1)
+	ps := reClause.FindAllString(s, -1)
 
 	// Since go's regex engine doesn't support look behind,
 	// We have to do this to avoid wrong splitting for "，是", "，有", "，还是", etc.
-	for i := len(parts) - 1; i > 0; i-- {
+	for i := len(ps) - 1; i > 0; i-- {
 		switch {
-		case strings.HasPrefix(parts[i], "是"):
-		case strings.HasPrefix(parts[i], "有"):
-		case strings.HasPrefix(parts[i], "还是"):
+		case strings.HasPrefix(ps[i], "是"):
+		case strings.HasPrefix(ps[i], "有"):
+		case strings.HasPrefix(ps[i], "还是"):
 		default:
 			continue
 		}
 
-		parts[i-1] += parts[i]
-		parts = parts[:i]
+		ps[i-1] += ps[i]
+		ps = ps[:i]
 	}
-	return parts
+	return ps
 }

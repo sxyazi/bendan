@@ -28,11 +28,7 @@ func YesOk(msg *tgbotapi.Message) bool {
 	}
 
 	text := yes_sel([2][]string{{"行", "行的", "我觉得行"}, {"不行", "不行的", "我觉得不行"}}, token)
-	if len(msg.Text) > 50 {
-		ReplyText(msg, text)
-	} else {
-		SendText(msg.Chat.ID, text)
-	}
+	ReplyText(msg, text)
 	return true
 }
 
@@ -53,11 +49,7 @@ func YesCanWill(msg *tgbotapi.Message) bool {
 		text = yes_sel([2][]string{{"能", "能！"}, {"不能", "不能！", "不，你不能"}}, token)
 	}
 
-	if len(msg.Text) > 50 {
-		ReplyText(msg, text)
-	} else {
-		SendText(msg.Chat.ID, text)
-	}
+	ReplyText(msg, text)
 	return true
 }
 
@@ -79,25 +71,29 @@ func YesIs(msg *tgbotapi.Message) bool {
 
 	var opt [2][]string
 	switch token.Typ {
-	case yes.TypIsYes: // 是X吗
+	case yes.TypIs: // 是X吗、应该是
+		if token.Word[:1] != "是" || token.Obj == "" { // e.g. "应该是", "是吧$"
+			opt = [2][]string{{"还真是"}, {"并不是"}}
+		} else {
+			opt = [2][]string{{"是", "是的"}, {"不是", "不是啊"}}
+		}
+	case yes.TypHave: // 有X吗
+		if token.Word[:1] != "有" || token.Obj == "" { // e.g. "应该有", "有吧$"
+			opt = [2][]string{{"还真有"}, {"并没有"}}
+		} else {
+			opt = [2][]string{{"有", "有的"}, {"没有", "没有啊"}}
+		}
+	case yes.TypIsYesNo: // 是不是X、是否X
 		opt = [2][]string{{"是", "是的"}, {"不是", "不是啊"}}
-	case yes.TypHaveYes: // 有X吗
-		opt = [2][]string{{"有", "有的"}, {"没有", "没有啊"}}
-	case yes.TypIsYesNo: // 是不是X
-		opt = [2][]string{{"是", "是的"}, {"不是", "不是啊"}}
-	case yes.TypHaveYesNo: // 有没有X
+	case yes.TypHaveYesNo: // 有没有X、有无X
 		opt = [2][]string{{"有", "有的", "有啊"}, {"没有", "没有啊", "并没有"}}
-	case yes.TypHaveSo: // 这么有X
+	case yes.TypHaveSo: // 这么有X、多么有X
 		opt = [2][]string{{"是的"}, {"确实有" + token.Obj, "确实是有" + token.Obj}}
 	default:
 		return false
 	}
 
-	if len(msg.Text) > 50 {
-		ReplyText(msg, yes_sel(opt, token))
-	} else {
-		SendText(msg.Chat.ID, yes_sel(opt, token))
-	}
+	ReplyText(msg, yes_sel(opt, token))
 	return true
 }
 
@@ -118,7 +114,7 @@ func YesLook(msg *tgbotapi.Message) bool {
 	}
 
 	text := yes_sel([2][]string{{"看看", "想看"}, {"窝也想看", "想看，gkd"}}, token)
-	if msg.ReplyToMessage == nil || len(msg.Text) <= 50 {
+	if msg.ReplyToMessage == nil {
 		SendText(msg.Chat.ID, text)
 	} else {
 		ReplyText(msg.ReplyToMessage, text)

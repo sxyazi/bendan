@@ -38,6 +38,9 @@ func TestIsTokenize(t *testing.T) {
 		{"但是AA还是个BB", ""},
 		{"想XX但是不敢！", ""},
 
+		{"应该是吧", "sub="},
+		{"和之前一样是吧", "sub=, obj=和之前一样"},
+
 		// HAVE
 		{"有无小裙子", "sub=, obj=小裙子"},
 		{"你有没有看到他", "sub=你, obj=看到他"},
