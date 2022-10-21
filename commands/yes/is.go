@@ -9,7 +9,7 @@ import (
 var reAOrB = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*([是有])\s*(.+?)\s*%s*还是\s*(.+?)(?:%s+|$)`, marks, marks))
 var reYesOrNo = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*(是不是|是否|有没有|有木有|有无)\s*(.*?)(?:%s+|$)`, marks))
 var reHaveSo = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*(这么|那么|多么)\s*有\s*(.*?)(?:%s+|$)`, marks))
-var reYes = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*((?:应该|我猜|其实|确实|大概)?[是有])\s*(.+?)\s*%s*[吗嘛吧罢?!？！]+`, marks))
+var reYes = regexp.MustCompile(fmt.Sprintf(`\s*(.*?)\s*([是有])\s*(.+?)\s*%s*[吗嘛吧罢?!？！]+`, marks))
 
 func typeOfIs(i int, s string) uint8 {
 	var typ uint8 = TypUnknown
