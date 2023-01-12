@@ -8,7 +8,7 @@ import (
 )
 
 func unpinOldMessages(chatId int64) {
-	messages, err := db.GetPinnedMessages(chatId)
+	messages, err := db.GetPinned(chatId)
 	if err != nil {
 		return
 	}
@@ -22,7 +22,7 @@ func unpinOldMessages(chatId int64) {
 			ChatID:    chatId,
 			MessageID: message.Id,
 		}); err == nil {
-			db.RemovePinnedMessage(message.Id, message.ChatId)
+			db.RemovePinned(message.Id, message.ChatId)
 		}
 	}
 }
@@ -32,7 +32,7 @@ func Pin(msg *tgbotapi.Message) bool {
 		return false
 	}
 
-	_, err := db.AddPinnedMessage(&types.PinnedMessage{
+	err := db.AddPinned(&types.PinnedMessage{
 		Id:     msg.ReplyToMessage.MessageID,
 		ChatId: msg.Chat.ID,
 	})
@@ -50,7 +50,7 @@ func Pin(msg *tgbotapi.Message) bool {
 	if err != nil {
 		log.Println("Error pinning message:", req.Description)
 
-		db.RemovePinnedMessage(msg.ReplyToMessage.MessageID, msg.Chat.ID)
+		db.RemovePinned(msg.ReplyToMessage.MessageID, msg.Chat.ID)
 		ReplyText(msg, "Check if the rights are enough in the chat")
 	}
 

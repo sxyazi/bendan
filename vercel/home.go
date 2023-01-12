@@ -2,6 +2,7 @@ package vercel
 
 import (
 	"github.com/sxyazi/bendan/boot"
+	"github.com/sxyazi/bendan/db"
 	. "github.com/sxyazi/bendan/utils"
 	"net/http"
 )
@@ -13,5 +14,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	db.Indexes()
 	boot.ServeHook(w, r)
 }

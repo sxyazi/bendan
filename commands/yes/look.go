@@ -4,7 +4,7 @@ import (
 	"regexp"
 )
 
-var reLook = regexp.MustCompile(`^\s*(看\s*看)\s*(.+)\s*$`)
+var reLook = regexp.MustCompile(`^\s*(看\s*看)\s*(.*?)\s*$`)
 
 func LookTokenize(s string) *Token {
 	ps := explode(s)

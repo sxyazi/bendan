@@ -4,15 +4,17 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	_ "github.com/mattn/go-sqlite3"
 	. "github.com/sxyazi/bendan/utils"
-	"log"
 )
 
 var all = []func(*tgbotapi.Message) bool{
-	Mark,
+	ForwardMark,
 	Pin,
+	Whoami,
 	Me,
 	Eval,
 	Call,
+	Mark,
+	Forward,
 	Purify,
 	YesRight,
 	YesIs,
@@ -23,13 +25,22 @@ var all = []func(*tgbotapi.Message) bool{
 var Bot *tgbotapi.BotAPI
 
 func Handle(update *tgbotapi.Update) {
-	if update.Message == nil || NeedToIgnore(Bot, update.Message.Text) {
+	var message *tgbotapi.Message
+	if update.Message != nil {
+		message = update.Message
+	} else if update.ChannelPost != nil {
+		message = update.ChannelPost
+	} else {
 		return
 	}
 
-	log.Printf("[%s] says: %s", update.Message.From.UserName, update.Message.Text)
+	if NeedToIgnore(Bot, message.Text) {
+		return
+	}
+
+	//log.Printf("[%s] says: %s", message.From.UserName, message.Text)
 	for _, command := range all {
-		if command(update.Message) {
+		if command(message) {
 			break
 		}
 	}

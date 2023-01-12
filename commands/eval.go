@@ -39,7 +39,7 @@ func Eval(msg *tgbotapi.Message) bool {
 			continue
 		}
 		buf.WriteString(`<code>`)
-		buf.WriteString(s)
+		buf.WriteString(strings.ReplaceAll(s, "<", "&lt;"))
 		buf.WriteString(`</code>`)
 	}
 

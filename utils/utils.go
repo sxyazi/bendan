@@ -32,7 +32,7 @@ func Serverless() bool {
 	return os.Getenv("VERCEL") == "1"
 }
 
-func Config(name string) string {
+func Config(name string) (s string) {
 	if Serverless() {
 		return os.Getenv(strings.ToUpper(name))
 	}
@@ -42,13 +42,20 @@ func Config(name string) string {
 		log.Fatal(err)
 	}
 
-	config := map[string]string{}
-	if err := json.Unmarshal(file, &config); err != nil {
+	config := map[string]json.RawMessage{}
+	if err = json.Unmarshal(file, &config); err != nil {
 		log.Fatal(err)
 	}
 
-	value, _ := config[name]
-	return value
+	value, ok := config[name]
+	if !ok {
+		return ""
+	}
+
+	if json.Unmarshal(value, &s) == nil {
+		return
+	}
+	return string(value)
 }
 
 func CreateBot() *tgbotapi.BotAPI {
@@ -163,6 +170,20 @@ func SeekLocation(u *url.URL) *url.URL {
 		return parsed
 	}
 	return nil
+}
+
+func DownloadFile(u string) (io.ReadCloser, error) {
+	req, err := http.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Body, nil
 }
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

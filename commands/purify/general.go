@@ -31,6 +31,7 @@ var generalParams = []string{
 	"from_source",
 	"from_spmid",
 	"vd_source",
+	"_trans_",
 }
 
 var reGeneral = regexp.MustCompile(`(?i)\b(` + strings.Join(generalParams, "|") + `)`)
