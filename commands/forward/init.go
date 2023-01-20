@@ -15,7 +15,7 @@ import (
 	"log"
 	"strings"
 	"sync"
-	"unicode/utf8"
+	"unicode/utf16"
 )
 
 var Cfg struct {
@@ -82,34 +82,34 @@ func uploadPhotos(bot *tgbotapi.BotAPI, fms []*types.ForwardedMessage, t *twitte
 }
 
 func formatText(text string, entities []tgbotapi.MessageEntity) string {
-	s := []rune(text)
+	s := utf16.Encode([]rune(text))
 	offset := 0
 	for _, e := range entities {
-		var rep string
+		var rep []uint16
 		switch e.Type {
 		case "mention":
-			username := string(s[e.Offset+1+offset : e.Offset+e.Length+offset])
-			rep = fmt.Sprintf("https://t.me/%s", username)
+			username := s[e.Offset+1+offset : e.Offset+e.Length+offset]
+			rep = append(utf16.Encode([]rune("https://t.me/")), username...)
 		case "hashtag":
-			tag := string(s[e.Offset+1+offset : e.Offset+e.Length+offset])
+			tag := string(utf16.Decode(s[e.Offset+1+offset : e.Offset+e.Length+offset]))
 			if !collect.Contains(Cfg.AllowedTags, tag) {
-				rep = ""
+				rep = nil
 			} else {
 				continue
 			}
 		case "text_link":
-			text := string(s[e.Offset+offset : e.Offset+e.Length+offset])
-			rep = fmt.Sprintf("%s (%s)", text, e.URL)
+			text := s[e.Offset+offset : e.Offset+e.Length+offset]
+			rep = append(text, utf16.Encode([]rune(" ("+e.URL+")"))...)
 		default:
 			continue
 		}
 
-		end := string(s[e.Offset+e.Length+offset:])
-		s = append(s[:e.Offset+offset], []rune(rep)...)
-		s = append(s, []rune(end)...)
-		offset += utf8.RuneCountInString(rep) - e.Length
+		end := s[e.Offset+e.Length+offset:]
+		s = append(s[:e.Offset+offset], rep...)
+		s = append(s, end...)
+		offset += len(rep) - e.Length
 	}
-	return strings.TrimSpace(string(s))
+	return strings.TrimSpace(string(utf16.Decode(s)))
 }
 
 func Mark(msg *tgbotapi.Message) error {
