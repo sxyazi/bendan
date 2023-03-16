@@ -8,7 +8,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/sxyazi/go-collection v0.0.3
 	go.mongodb.org/mongo-driver v1.11.1
-	golang.org/x/tools v0.2.0
 )
 
 require (
@@ -22,9 +21,7 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/exp v0.0.0-20230111222715-75897c7a292a // indirect
-	golang.org/x/mod v0.6.0 // indirect
-	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 )
