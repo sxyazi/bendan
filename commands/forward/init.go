@@ -5,22 +5,23 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"log"
+	"strings"
+	"sync"
+	"unicode/utf16"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sxyazi/bendan/db"
 	"github.com/sxyazi/bendan/types"
 	. "github.com/sxyazi/bendan/utils"
 	collect "github.com/sxyazi/go-collection"
 	"go.mongodb.org/mongo-driver/bson"
-	"io"
-	"log"
-	"strings"
-	"sync"
-	"unicode/utf16"
 )
 
 var Cfg struct {
 	Group struct {
-		Id    string `json:"id"`
+		ID    string `json:"id"`
 		Owner string `json:"owner"`
 	} `json:"group"`
 	Twitter struct {
@@ -45,7 +46,7 @@ func init() {
 
 func uploadPhotos(bot *tgbotapi.BotAPI, fms []*types.ForwardedMessage, t *twitter, m *mastodon) ([2][]string, error) {
 	// non-photo-group message
-	if fms[0].PhotoId == "" {
+	if fms[0].PhotoID == "" {
 		return [2][]string{}, nil
 	}
 
@@ -58,7 +59,7 @@ func uploadPhotos(bot *tgbotapi.BotAPI, fms []*types.ForwardedMessage, t *twitte
 		go func() {
 			defer wg.Done()
 
-			rc, err := DownloadFile(Value(bot.GetFileDirectURL(fm.PhotoId)))
+			rc, err := DownloadFile(Value(bot.GetFileDirectURL(fm.PhotoID)))
 			if err != nil {
 				fails = true
 				return
@@ -92,11 +93,10 @@ func formatText(text string, entities []tgbotapi.MessageEntity) string {
 			rep = append(utf16.Encode([]rune("https://t.me/")), username...)
 		case "hashtag":
 			tag := string(utf16.Decode(s[e.Offset+1+offset : e.Offset+e.Length+offset]))
-			if !collect.Contains(Cfg.AllowedTags, tag) {
-				rep = nil
-			} else {
+			if collect.Contains(Cfg.AllowedTags, tag) {
 				continue
 			}
+			rep = nil
 		case "text_link":
 			text := s[e.Offset+offset : e.Offset+e.Length+offset]
 			rep = append(text, utf16.Encode([]rune(" ("+e.URL+")"))...)
@@ -114,9 +114,9 @@ func formatText(text string, entities []tgbotapi.MessageEntity) string {
 
 func Mark(msg *tgbotapi.Message) error {
 	fm := &types.ForwardedMessage{
-		Id:         msg.MessageID,
+		ID:         msg.MessageID,
 		Text:       formatText(msg.Text, msg.Entities),
-		ChatId:     msg.Chat.ID,
+		ChatID:     msg.Chat.ID,
 		PhotoGroup: msg.MediaGroupID,
 	}
 
@@ -124,7 +124,7 @@ func Mark(msg *tgbotapi.Message) error {
 		fm.Text = formatText(msg.Caption, msg.CaptionEntities)
 	}
 	if len(msg.Photo) > 0 {
-		fm.PhotoId = Value(collect.Last(msg.Photo)).FileID
+		fm.PhotoID = Value(collect.Last(msg.Photo)).FileID
 	}
 	if fm.PhotoGroup == "" {
 		fm.PhotoGroup = fmt.Sprintf("single_%d", msg.MessageID)
@@ -140,32 +140,32 @@ func Forward(bot *tgbotapi.BotAPI, fms []*types.ForwardedMessage) (*types.Forwar
 	}
 
 	first := *fms[0]
-	if first.TweetId == "" {
+	if first.TweetID == "" {
 		_ = t.Create(&first, photos[0])
 	}
-	if first.TootId == "" {
+	if first.TootID == "" {
 		_ = m.Create(&first, photos[1])
 	}
-	if first.TweetId == "" && first.TootId == "" {
+	if first.TweetID == "" && first.TootID == "" {
 		return nil, errors.New("failed to forward")
 	}
 
-	_ = db.UpdateForwardedByGroup(fms[0].PhotoGroup, fms[0].ChatId, &bson.M{
-		"tweetId":  first.TweetId,
-		"tweetUrl": first.TweetUrl,
-		"tootId":   first.TootId,
-		"tootUrl":  first.TootUrl,
+	_ = db.UpdateForwardedByGroup(fms[0].PhotoGroup, fms[0].ChatID, &bson.M{
+		"tweetId":  first.TweetID,
+		"tweetUrl": first.TweetURL,
+		"tootId":   first.TootID,
+		"tootUrl":  first.TootURL,
 	})
-	if fms[0].PhotoId != "" {
+	if fms[0].PhotoID != "" {
 		for i, fm := range fms {
 			m := bson.M{}
-			if fms[0].TweetId == "" {
+			if fms[0].TweetID == "" {
 				m["tweetPhotoId"] = photos[0][i]
 			}
-			if fms[0].TootId == "" {
+			if fms[0].TootID == "" {
 				m["tootPhotoId"] = photos[1][i]
 			}
-			_ = db.UpdateForwarded(fm.Id, fm.ChatId, m)
+			_ = db.UpdateForwarded(fm.ID, fm.ChatID, m)
 		}
 	}
 	return &first, nil

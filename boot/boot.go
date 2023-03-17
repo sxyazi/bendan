@@ -2,12 +2,13 @@ package boot
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/sxyazi/bendan/commands"
-	. "github.com/sxyazi/bendan/utils"
 	"net/http"
 	"os"
 	"time"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/sxyazi/bendan/commands"
+	. "github.com/sxyazi/bendan/utils"
 )
 
 func ServePool() {
@@ -22,7 +23,7 @@ func ServePool() {
 	}
 }
 
-func ServeHook(w http.ResponseWriter, r *http.Request) {
+func ServeHook(w http.ResponseWriter, _ *http.Request) {
 	bot := CreateBot()
 	wh, _ := tgbotapi.NewWebhook(fmt.Sprintf("https://%s/hook/", os.Getenv("VERCEL_URL")))
 	if _, err := bot.Request(wh); err != nil {

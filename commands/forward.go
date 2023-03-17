@@ -2,11 +2,12 @@ package commands
 
 import (
 	"fmt"
+	"log"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sxyazi/bendan/commands/forward"
 	"github.com/sxyazi/bendan/db"
 	"github.com/sxyazi/bendan/types"
-	"log"
 )
 
 func ForwardMark(msg *tgbotapi.Message) bool {
@@ -14,7 +15,7 @@ func ForwardMark(msg *tgbotapi.Message) bool {
 		return false
 	} else if msg.ForwardFromChat == nil {
 		return true
-	} else if fmt.Sprint(msg.Chat.ID) != forward.Cfg.Group.Id {
+	} else if fmt.Sprint(msg.Chat.ID) != forward.Cfg.Group.ID {
 		return true
 	}
 
@@ -35,8 +36,8 @@ func ForwardMark(msg *tgbotapi.Message) bool {
 	}
 
 	rm := &types.RepliedMessage{
-		Id:        sent.MessageID,
-		ChatId:    sent.Chat.ID,
+		ID:        sent.MessageID,
+		ChatID:    sent.Chat.ID,
 		RepliedTo: msg.MessageID,
 	}
 	if err := db.AddReplied(rm); err == nil {
@@ -54,7 +55,7 @@ func Forward(msg *tgbotapi.Message) bool {
 		return false
 	} else if msg.Text != "c" && msg.Text != "d" {
 		return false
-	} else if fmt.Sprint(msg.Chat.ID) != forward.Cfg.Group.Id {
+	} else if fmt.Sprint(msg.Chat.ID) != forward.Cfg.Group.ID {
 		return false
 	} else if fmt.Sprint(msg.From.ID) != forward.Cfg.Group.Owner {
 		return false
@@ -66,13 +67,13 @@ func Forward(msg *tgbotapi.Message) bool {
 	}
 
 	DeleteMessage(msg)
-	fms, _ := db.GetForwarded(rm.RepliedTo, rm.ChatId)
+	fms, _ := db.GetForwarded(rm.RepliedTo, rm.ChatID)
 	if len(fms) < 1 {
 		EditText(msg.ReplyToMessage, "The original message is not reachable, try to update this message once on Telegram.\n\n[<b>c</b>]reate")
 		return true
 	}
 
-	if msg.Text == "c" && (fms[0].TweetId == "" || fms[0].TootId == "") {
+	if msg.Text == "c" && (fms[0].TweetID == "" || fms[0].TootID == "") {
 		if fm, err := forward.Forward(Bot, fms); err != nil {
 			log.Println("Failed to forward:", err)
 			EditText(msg.ReplyToMessage, "Failed to forward this message, to continue with the option(s) below:\n\n[<b>c</b>]reate")
@@ -80,12 +81,12 @@ func Forward(msg *tgbotapi.Message) bool {
 			EditText(msg.ReplyToMessage, fmt.Sprintf(
 				`Twitter: <a href="%s">%s</a>`+"\n"+
 					`Mastodon: <a href="%s">%s</a>`,
-				fm.TweetUrl, fm.TweetId,
-				fm.TootUrl, fm.TootId,
+				fm.TweetURL, fm.TweetID,
+				fm.TootURL, fm.TootID,
 			))
 		}
-	} else if msg.Text == "d" && (fms[0].TweetId != "" || fms[0].TootId != "") {
-		//TODO
+	} else if msg.Text == "d" && (fms[0].TweetID != "" || fms[0].TootID != "") {
+		// TODO
 	}
 	return true
 }

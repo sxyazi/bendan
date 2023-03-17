@@ -1,9 +1,10 @@
 package utils
 
 import (
+	"testing"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	collect "github.com/sxyazi/go-collection"
-	"testing"
 )
 
 func Test_NeedToIgnore(t *testing.T) {

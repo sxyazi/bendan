@@ -1,14 +1,15 @@
 package commands
 
 import (
+	"log"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sxyazi/bendan/db"
 	"github.com/sxyazi/bendan/types"
-	"log"
 )
 
-func unpinOldMessages(chatId int64) {
-	messages, err := db.GetPinned(chatId)
+func unpinOldMessages(chatID int64) {
+	messages, err := db.GetPinned(chatID)
 	if err != nil {
 		return
 	}
@@ -19,10 +20,10 @@ func unpinOldMessages(chatId int64) {
 
 	for _, message := range messages[10:] {
 		if _, err := Bot.Request(&tgbotapi.UnpinChatMessageConfig{
-			ChatID:    chatId,
-			MessageID: message.Id,
+			ChatID:    chatID,
+			MessageID: message.ID,
 		}); err == nil {
-			db.RemovePinned(message.Id, message.ChatId)
+			db.RemovePinned(message.ID, message.ChatID)
 		}
 	}
 }
@@ -33,8 +34,8 @@ func Pin(msg *tgbotapi.Message) bool {
 	}
 
 	err := db.AddPinned(&types.PinnedMessage{
-		Id:     msg.ReplyToMessage.MessageID,
-		ChatId: msg.Chat.ID,
+		ID:     msg.ReplyToMessage.MessageID,
+		ChatID: msg.Chat.ID,
 	})
 	if err != nil {
 		ReplyText(msg, "It seems pinned already")

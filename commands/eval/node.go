@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/sxyazi/bendan/utils"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/sxyazi/bendan/utils"
 )
 
 type Node struct{}
@@ -48,7 +49,7 @@ var reNodeNonExpr = regexp.MustCompile(strings.Join([]string{
 	`async\s+function\s*\*\s*[a-zA-Z$][a-zA-Z0-9$]*`,
 }, "|"))
 
-func (n *Node) compile(code, nonce string) string {
+func (*Node) compile(code, nonce string) string {
 	noComment := strings.TrimSpace(reNodeComment.ReplaceAllString(code, ""))
 	if strings.Contains(noComment, "\n") {
 		return code

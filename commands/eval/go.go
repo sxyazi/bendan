@@ -3,13 +3,14 @@ package eval
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/sxyazi/bendan/utils/fix"
 	"go/parser"
 	"io"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/sxyazi/bendan/utils/fix"
 )
 
 type Go struct{}
@@ -27,7 +28,7 @@ var reGoFnEntry = regexp.MustCompile(`func\s+main\s*\(\s*\)\s*{(?:\s|\b)`)
 var reGoPackEntry = regexp.MustCompile(`package\s+main\s*(?:;|$)`)
 var reGoComment = regexp.MustCompile(`(?m)^\s*//.*$`)
 
-func (g *Go) compile(code string) string {
+func (*Go) compile(code string) string {
 	// Check if the code is an expression
 	noComment := strings.TrimSpace(reGoComment.ReplaceAllString(code, ""))
 	if _, err := parser.ParseExpr(code); err != nil {

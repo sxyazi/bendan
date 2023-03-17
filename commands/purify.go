@@ -1,12 +1,13 @@
 package commands
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/sxyazi/bendan/commands/purify"
-	"github.com/sxyazi/bendan/utils"
 	"net/url"
 	"strings"
 	"sync"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/sxyazi/bendan/commands/purify"
+	"github.com/sxyazi/bendan/utils"
 )
 
 func Purify(msg *tgbotapi.Message) bool {
@@ -30,7 +31,7 @@ func Purify(msg *tgbotapi.Message) bool {
 	for i, u := range todo {
 		go func(i int, u *url.URL) {
 			defer wg.Done()
-			todo[i] = purify.Tracks.Do(&purify.Stage{Url: u})
+			todo[i] = purify.Tracks.Do(&purify.Stage{URL: u})
 		}(i, u)
 	}
 

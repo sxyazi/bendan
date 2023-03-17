@@ -43,15 +43,15 @@ func (*general) match(u *url.URL) []string {
 }
 
 func (*general) handle(s *Stage) *url.URL {
-	qs := s.Url.Query()
+	qs := s.URL.Query()
 	for name := range qs {
 		if reGeneral.MatchString(name) {
 			qs.Del(name)
 		}
 	}
 
-	s.Url.RawQuery = qs.Encode()
-	return s.Url
+	s.URL.RawQuery = qs.Encode()
+	return s.URL
 }
 
 func (*general) allowed(*url.URL) (string, bool) {

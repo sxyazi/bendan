@@ -26,7 +26,7 @@ var reAffParams = regexp.MustCompile(`(?i)\b(` + strings.Join(affParams, "|") + 
 
 type aff struct{}
 
-func (a *aff) match(u *url.URL) []string {
+func (*aff) match(u *url.URL) []string {
 	if u.Path == "" || u.Path == "/" {
 		// root path
 	} else if !reAffPaths.MatchString(u.Path) {
@@ -35,19 +35,19 @@ func (a *aff) match(u *url.URL) []string {
 	return reAffParams.FindStringSubmatch(u.RawQuery)
 }
 
-func (a *aff) handle(s *Stage) *url.URL {
-	qs := s.Url.Query()
+func (*aff) handle(s *Stage) *url.URL {
+	qs := s.URL.Query()
 	for name := range qs {
 		if reAffParams.MatchString(name) {
 			qs.Del(name)
 		}
 	}
-	s.Url.RawQuery = qs.Encode()
+	s.URL.RawQuery = qs.Encode()
 
 	// dig down to `general`
-	return Tracks.Do(&Stage{Url: s.Url})
+	return Tracks.Do(&Stage{URL: s.URL})
 }
 
-func (a *aff) allowed(*url.URL) (string, bool) {
+func (*aff) allowed(*url.URL) (string, bool) {
 	return "", false
 }

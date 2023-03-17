@@ -6,22 +6,23 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	"github.com/sxyazi/bendan/types"
-	. "github.com/sxyazi/bendan/utils"
 	"io"
 	"log"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/sxyazi/bendan/types"
+	. "github.com/sxyazi/bendan/utils"
 )
 
 var client = resty.New()
 
 type twitter struct{}
 
-func (t *twitter) buildHeader(method, path string, params map[string]string) string {
+func (*twitter) buildHeader(method, path string, params map[string]string) string {
 	c := Cfg.Twitter
 	vals := url.Values{}
 	vals.Add("oauth_consumer_key", c.ConsumerKey)
@@ -53,7 +54,7 @@ func (t *twitter) buildHeader(method, path string, params map[string]string) str
 
 func (t *twitter) uploadPhoto(photo io.Reader) (string, error) {
 	var result struct {
-		MediaIdString string `json:"media_id_string"`
+		MediaIDString string `json:"media_id_string"`
 	}
 
 	auth := t.buildHeader("POST", "https://upload.twitter.com/1.1/media/upload.json", nil)
@@ -65,10 +66,10 @@ func (t *twitter) uploadPhoto(photo io.Reader) (string, error) {
 
 	if err != nil {
 		return "", err
-	} else if result.MediaIdString == "" {
+	} else if result.MediaIDString == "" {
 		return "", errors.New("no photo id found in response")
 	} else {
-		return result.MediaIdString, nil
+		return result.MediaIDString, nil
 	}
 }
 
@@ -77,7 +78,7 @@ func (t *twitter) Get(id string) (string, error) {
 
 	var result struct {
 		Data struct {
-			Id   string `json:"id"`
+			ID   string `json:"id"`
 			Text string `json:"text"`
 		} `json:"data"`
 	}
@@ -88,7 +89,7 @@ func (t *twitter) Get(id string) (string, error) {
 
 	if err != nil {
 		return "", err
-	} else if result.Data.Id == "" {
+	} else if result.Data.ID == "" {
 		return "", errors.New("no tweet found")
 	} else {
 		return result.Data.Text, nil
@@ -111,7 +112,7 @@ func (t *twitter) Create(fm *types.ForwardedMessage, photos []string) error {
 
 	var result struct {
 		Data struct {
-			Id string `json:"id"`
+			ID string `json:"id"`
 		} `json:"data"`
 	}
 
@@ -125,12 +126,12 @@ func (t *twitter) Create(fm *types.ForwardedMessage, photos []string) error {
 	if err != nil {
 		log.Println("Error posting to twitter:", err)
 		return err
-	} else if result.Data.Id == "" {
+	} else if result.Data.ID == "" {
 		log.Println("Error posting to twitter, response:", resp.String())
 		return errors.New("no tweet id found in response")
 	} else {
-		fm.TweetId = result.Data.Id
-		fm.TweetUrl = "https://twitter.com/_/status/" + result.Data.Id
+		fm.TweetID = result.Data.ID
+		fm.TweetURL = "https://twitter.com/_/status/" + result.Data.ID
 		return nil
 	}
 }

@@ -69,11 +69,11 @@ func explode(s string) []string {
 
 func rmRec(s string, re *regexp.Regexp) string {
 	for s != "" {
-		if old, r := s, re.ReplaceAllString(s, ""); r != old {
-			s = r
-		} else {
+		old, rep := s, re.ReplaceAllString(s, "")
+		if rep == old {
 			break
 		}
+		s = rep
 	}
 	return s
 }

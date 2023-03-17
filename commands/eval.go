@@ -2,10 +2,11 @@ package commands
 
 import (
 	"bytes"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/sxyazi/bendan/commands/eval"
 	"regexp"
 	"strings"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/sxyazi/bendan/commands/eval"
 )
 
 var reEval = regexp.MustCompile(`(?mi)^//\s*(go|golang|js|javascript|node|nodejs)[\s\n]+([\s\S]+)`)

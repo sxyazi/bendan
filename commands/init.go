@@ -2,7 +2,6 @@ package commands
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	_ "github.com/mattn/go-sqlite3"
 	. "github.com/sxyazi/bendan/utils"
 )
 

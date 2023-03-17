@@ -12,7 +12,7 @@ type bilibili struct{}
 var reBilibiliBV = regexp.MustCompile(`^https?://(?:www\.)?bilibili\.com/video/(BV[a-zA-Z0-9]{10,})`)
 var reBilibiliAV = regexp.MustCompile(`^https?://(?:www\.)?bilibili\.com/video/(av\d+)`)
 
-func (b *bilibili) match(u *url.URL) []string {
+func (*bilibili) match(u *url.URL) []string {
 	if m := reBilibiliBV.FindStringSubmatch(u.String()); len(m) > 0 {
 		return m
 	}
@@ -20,15 +20,15 @@ func (b *bilibili) match(u *url.URL) []string {
 }
 
 func (b *bilibili) handle(s *Stage) *url.URL {
-	s.Url.Path = "/video/" + b.bvToAv(s.matches[1])
-	return s.Url
+	s.URL.Path = "/video/" + b.bvToAv(s.matches[1])
+	return s.URL
 }
 
-func (b *bilibili) allowed(u *url.URL) (string, bool) {
+func (*bilibili) allowed(u *url.URL) (string, bool) {
 	return "p:pi", reBilibiliAV.MatchString(u.String())
 }
 
-func (b *bilibili) bvToAv(s string) string {
+func (*bilibili) bvToAv(s string) string {
 	t := "fZodR9XQDSUm21yCkr6zBqiveYah8bt4xsWpHnJE7jL5VG3guMTKNPAwcF"
 	tr := make(map[rune]int, len(t))
 	n := []int{11, 10, 3, 8, 4, 6}

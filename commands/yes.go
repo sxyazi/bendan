@@ -2,13 +2,14 @@ package commands
 
 import (
 	"crypto/sha1"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/sxyazi/bendan/commands/yes"
 	"math/rand"
 	"strings"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/sxyazi/bendan/commands/yes"
 )
 
-func yes_sel(a [2][]string, t *yes.Token) string {
+func yesSel(a [2][]string, t *yes.Token) string {
 	var s []string
 	if rand.Float64() > .9 {
 		s = a[rand.Int()&1]
@@ -51,7 +52,7 @@ func YesRight(msg *tgbotapi.Message) bool {
 		}
 	}
 
-	ReplyText(msg, yes_sel(opt, token))
+	ReplyText(msg, yesSel(opt, token))
 	return true
 }
 
@@ -67,7 +68,7 @@ func YesIs(msg *tgbotapi.Message) bool {
 
 	// TypIsAB/TypeHaveAB
 	if token.Ind != "" {
-		SendText(msg.Chat.ID, yes_sel([2][]string{{token.Ind, token.Ind + "！"}, {token.Obj, token.Obj + "！"}}, token))
+		SendText(msg.Chat.ID, yesSel([2][]string{{token.Ind, token.Ind + "！"}, {token.Obj, token.Obj + "！"}}, token))
 		return true
 	}
 
@@ -87,7 +88,7 @@ func YesIs(msg *tgbotapi.Message) bool {
 		return false
 	}
 
-	ReplyText(msg, yes_sel(opt, token))
+	ReplyText(msg, yesSel(opt, token))
 	return true
 }
 
@@ -104,9 +105,9 @@ func YesCan(msg *tgbotapi.Message) bool {
 	var text string
 	switch []rune(token.Word)[0] {
 	case '能':
-		text = yes_sel([2][]string{{"能", "能！"}, {"不能", "不能！", "不，你不能"}}, token)
+		text = yesSel([2][]string{{"能", "能！"}, {"不能", "不能！", "不，你不能"}}, token)
 	case '会':
-		text = yes_sel([2][]string{{"会", "会！", "会的"}, {"不会", "不会啊", "不会的！"}}, token)
+		text = yesSel([2][]string{{"会", "会！", "会的"}, {"不会", "不会啊", "不会的！"}}, token)
 	}
 
 	ReplyText(msg, text)
@@ -129,7 +130,7 @@ func YesLook(msg *tgbotapi.Message) bool {
 		return true
 	}
 
-	text := yes_sel([2][]string{{"看看", "想看"}, {"窝也想看", "想看，gkd"}}, token)
+	text := yesSel([2][]string{{"看看", "想看"}, {"窝也想看", "想看，gkd"}}, token)
 	if msg.ReplyToMessage == nil {
 		SendText(msg.Chat.ID, text)
 	} else {

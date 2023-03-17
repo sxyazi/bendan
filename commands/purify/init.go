@@ -12,7 +12,7 @@ type tracks []interface {
 
 type Stage struct {
 	Deep int
-	Url  *url.URL
+	URL  *url.URL
 
 	matches []string
 }
@@ -62,7 +62,7 @@ func (t tracks) do(s string) string {
 	u, err := url.Parse(s)
 	if err != nil {
 		return s
-	} else if u = t.Do(&Stage{Url: u}); u != nil {
+	} else if u = t.Do(&Stage{URL: u}); u != nil {
 		return u.String()
 	}
 	return s
@@ -75,43 +75,43 @@ func (t tracks) Do(s *Stage) *url.URL {
 	}
 
 	for _, v := range t {
-		matches := v.match(s.Url)
+		matches := v.match(s.URL)
 		if len(matches) < 1 {
 			continue
 		}
 
 		// remove the queries that are not allowed
-		qs := s.Url.Query()
-		allowed, stop := v.allowed(s.Url)
-		removal := validExpr(s.Url, parseExpr(allowed))
+		qs := s.URL.Query()
+		allowed, stop := v.allowed(s.URL)
+		removal := validExpr(s.URL, parseExpr(allowed))
 		for _, k := range removal {
 			qs.Del(k)
 		}
-		s.Url.RawQuery = qs.Encode()
+		s.URL.RawQuery = qs.Encode()
 
 		// handle the url with called the custom handler
 		if !stop {
 			s.matches = matches
-			s.Url = v.handle(s)
+			s.URL = v.handle(s)
 		}
 		break
 	}
 
 	// do purify for the queries of the rest recursively
-	qs := s.Url.Query()
+	qs := s.URL.Query()
 	for _, q := range qs {
 		for i, v := range q {
 			q[i] = t.do(v)
 		}
 	}
-	s.Url.RawQuery = qs.Encode()
+	s.URL.RawQuery = qs.Encode()
 
 	// if there fragment is still being, purify it recursively
-	if s.Url.Fragment != "" {
-		s.Url.Fragment = t.do(s.Url.Fragment)
+	if s.URL.Fragment != "" {
+		s.URL.Fragment = t.do(s.URL.Fragment)
 	}
 
-	return s.Url
+	return s.URL
 }
 
 var Tracks = tracks{}

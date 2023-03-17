@@ -17,7 +17,7 @@ func (*youtube) handle(s *Stage) *url.URL {
 	if u, err := url.Parse("https://www.youtube.com/watch?v=" + s.matches[1]); err == nil {
 		return u
 	}
-	return s.Url
+	return s.URL
 }
 
 func (*youtube) allowed(*url.URL) (string, bool) {

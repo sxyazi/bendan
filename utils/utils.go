@@ -3,7 +3,6 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"io"
 	"log"
 	"math/rand"
@@ -13,9 +12,11 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func Value[T any](first T, rest ...any) T {
+func Value[T any](first T, _ ...any) T {
 	return first
 }
 
@@ -39,12 +40,14 @@ func Config(name string) (s string) {
 
 	file, err := os.ReadFile(".config")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Can not read the .config file")
+		return ""
 	}
 
 	config := map[string]json.RawMessage{}
 	if err = json.Unmarshal(file, &config); err != nil {
-		log.Fatal(err)
+		log.Println("Can not parse the .config file")
+		return ""
 	}
 
 	value, ok := config[name]
@@ -132,7 +135,7 @@ func NewClient() *http.Client {
 var Client = NewClient()
 
 var reRefreshMeta = regexp.MustCompile(`(?im)<meta\s.*?http-equiv\s*=\s*['"\s]*?refresh['"\s]*?.*?>`)
-var reRefreshUrl = regexp.MustCompile(`(?i);\s*URL=(.+?)['"\s]`)
+var reRefreshURL = regexp.MustCompile(`(?i);\s*URL=(.+?)['"\s]`)
 
 func SeekLocation(u *url.URL) *url.URL {
 	// Set up the request
@@ -162,7 +165,7 @@ func SeekLocation(u *url.URL) *url.URL {
 	m := reRefreshMeta.FindSubmatch(Value(io.ReadAll(resp.Body)))
 	if len(m) < 1 {
 		return nil
-	} else if m = reRefreshUrl.FindSubmatch(m[0]); len(m) < 2 {
+	} else if m = reRefreshURL.FindSubmatch(m[0]); len(m) < 2 {
 		return nil
 	} else if parsed, err := url.Parse(string(m[1])); err != nil {
 		return nil
