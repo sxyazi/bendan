@@ -41,7 +41,7 @@ func dcQueryByFileId(fileId string) int {
 		log.Printf("DC query by file id: Error occurred while decoding file id: %s, err: %v\n", fileId, err)
 		return -1
 	}
-	if data := rleDecode(string(decodeFileId[:])); len(data) >= 4 {
+	if data := rleDecode(string(decodeFileId[:])); len(data) > 4 {
 		if dc := data[4]; dc >= 1 && dc <= 5 {
 			return dc
 		}
