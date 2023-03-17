@@ -4,26 +4,7 @@ import (
 	"testing"
 )
 
-func Test_DC_Query_By_Username(t *testing.T) {
-	var data = []struct {
-		text string
-		want string
-	}{
-		{"PavelDurovs", "4"},
-		{"TelegramTips", "4"},
-		{"TelegramTipsAR", "1"},
-		{"0", ""},
-		{"", ""},
-	}
-
-	for _, d := range data {
-		if got := dcQueryByUsername(d.text); d.want != got {
-			t.Errorf("dcQuery(%s) = %v, want %v", d.text, got, d.want)
-		}
-	}
-}
-
-func Test_DC_Query_By_File_Id(t *testing.T) {
+func Test_dataCenterBy(t *testing.T) {
 	var data = []struct {
 		text string
 		want int
@@ -37,8 +18,8 @@ func Test_DC_Query_By_File_Id(t *testing.T) {
 	}
 
 	for _, d := range data {
-		if got := dcQueryByFileId(d.text); d.want != got {
-			t.Errorf("dcQuery(%s) = %v, want %v", d.text, got, d.want)
+		if got := dataCenterBy(d.text); d.want != got {
+			t.Errorf("dataCenterBy(%s) = %v, want %v", d.text, got, d.want)
 		}
 	}
 }
