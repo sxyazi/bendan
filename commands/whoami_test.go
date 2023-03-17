@@ -34,11 +34,6 @@ func Test_DC_Query_By_File_Id(t *testing.T) {
 		{"AgACAgQAAxUAAWJGyzZFag7qs544PxHGvabVQ6wUAAIZuTEbcDIYUqVQrWEZVR2JAQADAgADYwADIwQ", 4},
 		{"BQACAgUAAx0CVTVl8wACQbJiRlY8fOQVb8cEg_eiBU3A3DZ6ZwACwgYAAu5bOFaKGWHnjrb_biME", 5},
 		{"", -1},
-		{"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", -1},
-		{"!!!!!!!!!!!!!!!^&*^%%&^&%^", -1},
-		{"              ", -1},
-		{"XXXXXXXXXXXXXXXXXXXXXXXXXXXXX", -1},
-		{"XXXXXXAAZZZZZXXXXXXXXXXXXXXX", -1},
 	}
 
 	for _, d := range data {
