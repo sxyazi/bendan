@@ -9,18 +9,11 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"strings"
 )
 
 // This DC query method is based on decoding the user profile photo file id.
 // The implementation of golang code is based on this blog: https://woomai.me/talk/telegram-determine-dc-by-file-id/.
 func dcQueryByFileId(fileId string) int {
-	b64decode := func(str string) []byte {
-		str = strings.ReplaceAll(str, "-", "+")
-		str = strings.ReplaceAll(str, "_", "/")
-		data, _ := base64.StdEncoding.DecodeString(str)
-		return data
-	}
 	rleDecode := func(binStr string) []int {
 		result := make([]int, 0)
 		isPreviousZero := false
@@ -43,7 +36,12 @@ func dcQueryByFileId(fileId string) int {
 		}
 		return result
 	}
-	if data := rleDecode(string(b64decode(fileId))); len(data) >= 4 {
+	decodeFileId, err := base64.RawURLEncoding.DecodeString(fileId)
+	if err != nil {
+		log.Printf("DC query by file id: Error occurred while decoding file id: %s, err: %v\n", fileId, err)
+		return -1
+	}
+	if data := rleDecode(string(decodeFileId[:])); len(data) >= 4 {
 		if dc := data[4]; dc >= 1 && dc <= 5 {
 			return dc
 		}
