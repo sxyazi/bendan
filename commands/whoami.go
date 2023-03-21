@@ -44,8 +44,8 @@ func Whoami(msg *tgbotapi.Message) bool {
 
 	// Data center
 	photo, _ := collect.First(Value(Bot.GetUserProfilePhotos(tgbotapi.UserProfilePhotosConfig{UserID: msg.From.ID})).Photos)
-	if id, ok := collect.First(photo); ok {
-		text += fmt.Sprintf("\nUser DC: <code>%d</code>", dataCenterBy(id.FileID))
+	if p, ok := collect.First(photo); ok {
+		text += fmt.Sprintf("\nUser DC: <code>%d</code>", dataCenterBy(p.FileID))
 	}
 
 	ReplyText(msg, text)

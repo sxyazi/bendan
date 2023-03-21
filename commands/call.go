@@ -2,38 +2,50 @@ package commands
 
 import (
 	"fmt"
+	"strings"
+	"unicode/utf16"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	. "github.com/sxyazi/bendan/utils"
-	"strings"
 )
 
-func targetOfInteraction(msg *tgbotapi.Message) *tgbotapi.User {
-	// Just raised a call blandly
-	if msg.ReplyToMessage == nil {
-		return &tgbotapi.User{ID: msg.From.ID, FirstName: "自己"}
+func targetOfInteraction(msg *tgbotapi.Message) string {
+	// Raise a call blandly
+	r := msg.ReplyToMessage
+	if r == nil {
+		return "自己"
+	} else if r.SenderChat != nil && msg.SenderChat != nil && r.SenderChat.ID == msg.SenderChat.ID {
+		return "自己"
+	} else if r.From.ID == msg.From.ID {
+		return "自己"
 	}
 
 	// Aiming at one mentioned by this bot
-	target := msg.ReplyToMessage.From
-	if target.ID == Bot.Self.ID && len(msg.ReplyToMessage.Entities) > 0 {
-		for _, entity := range msg.ReplyToMessage.Entities {
-			if entity.Type != "text_mention" || entity.User == nil {
-				continue
-			}
-
-			target = entity.User
-			if target.ID != msg.From.ID {
-				break
+	if r.From.ID == Bot.Self.ID {
+		for _, e := range r.Entities {
+			switch e.Type {
+			case "text_mention":
+				if e.User == nil {
+					continue
+				}
+				if e.User.ID != msg.From.ID && e.User.ID != Bot.Self.ID {
+					return SenderName(&tgbotapi.Message{From: e.User})
+				}
+			case "text_link":
+				if !strings.HasPrefix(e.URL, "tg://resolve?domain=") {
+					continue
+				}
+				if msg.SenderChat == nil || msg.SenderChat.UserName != e.URL[20:] {
+					s := utf16.Encode([]rune(r.Text))
+					return fmt.Sprintf(`<a href="%s">%s</a>`, e.URL,
+						string(utf16.Decode(s[e.Offset:e.Offset+e.Length])))
+				}
 			}
 		}
+		return ""
 	}
 
-	// Aiming at its previous session
-	if target.ID == msg.From.ID {
-		return &tgbotapi.User{ID: msg.From.ID, FirstName: "自己"}
-	}
-
-	return target
+	return SenderName(r)
 }
 
 func Call(msg *tgbotapi.Message) bool {
@@ -45,7 +57,7 @@ func Call(msg *tgbotapi.Message) bool {
 
 	// Bot does not in the interaction
 	target := targetOfInteraction(msg)
-	if target.ID == Bot.Self.ID {
+	if target == "" {
 		return false
 	}
 
@@ -53,9 +65,9 @@ func Call(msg *tgbotapi.Message) bool {
 	params := strings.Fields(msg.Text[1:])
 	switch len(params) {
 	case 1:
-		message = fmt.Sprintf(`%s %s了 %s ！`, LinkedName(msg.From), params[0], LinkedName(target))
+		message = fmt.Sprintf(`%s %s了 %s ！`, SenderName(msg), params[0], target)
 	case 2:
-		message = fmt.Sprintf(`%s %s %s %s！`, LinkedName(msg.From), params[0], LinkedName(target), params[1])
+		message = fmt.Sprintf(`%s %s %s %s！`, SenderName(msg), params[0], target, params[1])
 	default:
 		return false
 	}

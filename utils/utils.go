@@ -20,13 +20,22 @@ func Value[T any](first T, _ ...any) T {
 	return first
 }
 
-func LinkedName(user *tgbotapi.User) string {
-	var lastName = user.LastName
+func SenderName(msg *tgbotapi.Message) string {
+	var firstName, lastName, href string
+	if msg.SenderChat != nil {
+		firstName = msg.SenderChat.Title
+		href = fmt.Sprintf("tg://resolve?domain=%s", msg.SenderChat.UserName)
+	} else {
+		firstName = msg.From.FirstName
+		lastName = msg.From.LastName
+		href = fmt.Sprintf("tg://user?id=%d", msg.From.ID)
+	}
+
 	if lastName != "" {
 		lastName = " " + lastName
 	}
 
-	return fmt.Sprintf(`<a href="tg://user?id=%d">%s%s</a>`, user.ID, user.FirstName, lastName)
+	return fmt.Sprintf(`<a href="%s">%s%s</a>`, href, firstName, lastName)
 }
 
 func Serverless() bool {

@@ -2,9 +2,10 @@ package commands
 
 import (
 	"fmt"
+	"strings"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	. "github.com/sxyazi/bendan/utils"
-	"strings"
 )
 
 func Me(msg *tgbotapi.Message) bool {
@@ -17,6 +18,6 @@ func Me(msg *tgbotapi.Message) bool {
 		return false
 	}
 
-	SendText(msg.Chat.ID, fmt.Sprintf("%s %s！", LinkedName(msg.From), message))
+	SendText(msg.Chat.ID, fmt.Sprintf("%s %s！", SenderName(msg), message))
 	return true
 }
