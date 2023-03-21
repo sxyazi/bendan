@@ -32,11 +32,11 @@ func YesRight(msg *tgbotapi.Message) bool {
 	var opt [2][]string
 	switch []rune(token.Word)[0] {
 	case '对':
-		opt = [2][]string{{"对", "对的", "emm好像挺对的"}, {"No", "不对", "不大对"}}
+		opt = [2][]string{{"对", "对的", "emm好像挺对的"}, {"no", "不对", "不大对"}}
 	case '是':
-		opt = [2][]string{{"是", "是的", "是啊"}, {"No", "不是", "应该不是"}}
+		opt = [2][]string{{"是", "是的", "是啊", "是欸", "是吧"}, {"no", "不是", "不是吧", "不是啊", "应该不是"}}
 	case '有':
-		opt = [2][]string{{"有", "有的", "有啊"}, {"No", "没有", "没吧"}}
+		opt = [2][]string{{"有", "有的", "有啊", "有欸", "有吧"}, {"no", "没有", "没啊", "没吧", "没有吧", "应该没吧"}}
 	case '行':
 		opt = [2][]string{{"行", "行啊", "我觉得行"}, {"不行", "不太行", "我觉得不行"}}
 	default: // e.g. "应该是", "应该有", etc.
@@ -48,7 +48,7 @@ func YesRight(msg *tgbotapi.Message) bool {
 		case strings.Contains(token.Word, "有"): // "X应该有吧", "X应该有X吧"
 			opt = [2][]string{{"好像有", "应该有", "还真有", "草，还真有"}, {"没有啊", "并没有", "然而并没有", "我倒希望有"}}
 		default: // "X应该行吧"
-			opt = [2][]string{{"y", "yyy", "可以", "肯定行啊", "我觉得行"}, {"不行", "不太行", "应该不行", "肯定不行", "我觉得不行"}}
+			opt = [2][]string{{"y", "yyy", "可以", "肯定行", "我觉得行"}, {"不行", "不太行", "应该不行", "肯定不行", "我觉得不行"}}
 		}
 	}
 
@@ -75,15 +75,15 @@ func YesIs(msg *tgbotapi.Message) bool {
 	var opt [2][]string
 	switch token.Typ {
 	case yes.TypIs: // 是X吗
-		opt = [2][]string{{"是", "是的"}, {"不是", "不是啊"}}
+		opt = [2][]string{{"是", "是的"}, {"不是", "不是啊", "不是哦"}}
 	case yes.TypHave: // 有X吗
-		opt = [2][]string{{"有", "有的"}, {"没有", "没有啊"}}
+		opt = [2][]string{{"有", "有的", "有啊"}, {"没", "没吧", "没啊", "没有啊"}}
 	case yes.TypIsYesNo: // 是不是X、是否X
-		opt = [2][]string{{"是", "是的"}, {"不是", "不是啊"}}
+		opt = [2][]string{{"是", "是的", "yyy"}, {"no", "不是", "不是啊"}}
 	case yes.TypHaveYesNo: // 有没有X、有无X
-		opt = [2][]string{{"有", "有的", "有啊"}, {"没有", "没有啊", "并没有"}}
+		opt = [2][]string{{"有", "有的", "有啊"}, {"无", "没", "没有", "没啊", "并没有"}}
 	case yes.TypHaveSo: // 这么有X、多么有X
-		opt = [2][]string{{"是的"}, {"确实有" + token.Obj, "确实是有" + token.Obj}}
+		opt = [2][]string{{"是的", "是的捏"}, {"确实有" + token.Obj, "确实是有" + token.Obj}}
 	default:
 		return false
 	}
@@ -105,7 +105,7 @@ func YesCan(msg *tgbotapi.Message) bool {
 	var text string
 	switch []rune(token.Word)[0] {
 	case '能':
-		text = yesSel([2][]string{{"能", "能！"}, {"不能", "不能！", "不，你不能"}}, token)
+		text = yesSel([2][]string{{"能", "能！", "能啊"}, {"不能", "不能！", "不可以！", "不，你不能"}}, token)
 	case '会':
 		text = yesSel([2][]string{{"会", "会！", "会的"}, {"不会", "不会啊", "不会的！"}}, token)
 	}
@@ -125,7 +125,7 @@ func YesLook(msg *tgbotapi.Message) bool {
 	}
 
 	if rand.Float64() > .9 {
-		opt := []string{"看看你的", "can can need"}
+		opt := []string{"你的呢", "看看你的", "can can need"}
 		ReplyText(msg, opt[rand.Intn(len(opt))])
 		return true
 	}
