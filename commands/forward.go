@@ -30,7 +30,7 @@ func ForwardMark(msg *tgbotapi.Message) bool {
 		return true
 	}
 
-	sent := ReplyText(msg, "It's ready to sync to other platforms. Reply to this message with any option to operate:\n\n[<b>c</b>]reate")
+	sent := ReplyText(msg, "It's ready to sync with other platforms. Reply to this message with any option to operate:\n\n[<b>c</b>]reate")
 	if sent == nil {
 		return true
 	}

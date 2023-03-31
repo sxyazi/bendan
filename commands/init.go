@@ -11,6 +11,7 @@ var all = []func(*tgbotapi.Message) bool{
 	Whoami,
 	Me,
 	Eval,
+	Dontworry,
 	Call,
 	Mark,
 	Forward,
