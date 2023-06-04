@@ -6,8 +6,14 @@ import (
 
 type tracks []interface {
 	match(*url.URL) []string
+
+	// stop:
+	//   0. no
+	//   1. yes
+	//   2. yes, if no disallowed params are present
+	allowed(*url.URL) (string, uint8)
+
 	handle(*Stage) *url.URL
-	allowed(*url.URL) (string, bool)
 }
 
 type Stage struct {
@@ -15,47 +21,45 @@ type Stage struct {
 	URL  *url.URL
 
 	matches []string
+	removal []string
 }
 
-func (t tracks) test(s string) int {
+func (t tracks) test(s string) bool {
 	if u, err := url.Parse(s); err == nil {
 		return t.Test(u)
 	}
-	return -1
+	return false
 }
 
-func (t tracks) Test(u *url.URL) int {
-	for i, v := range t {
+func (t tracks) Test(u *url.URL) bool {
+	for _, v := range t {
 		if len(v.match(u)) < 1 {
 			continue
 		}
 
-		allowed, stop := v.allowed(u)
-		removal := validExpr(u, parseExpr(allowed))
-
-		if !stop {
-			return i
-		} else if len(removal) > 0 {
-			return 1 << 20
+		if allowed, stop := v.allowed(u); stop == 0 {
+			return true
+		} else if len(validExpr(u, parseExpr(allowed))) > 0 {
+			return true
 		}
 	}
 
-	// test the part of url as a fragment
+	// test the fragments as a part of url
 	if u.Fragment != "" {
-		if r := t.test(u.Fragment); r >= 0 {
-			return r
+		if t.test(u.Fragment) {
+			return true
 		}
 	}
 
-	// test for sub queries at all
+	// test for all sub queries
 	for _, q := range u.Query() {
 		for _, v := range q {
-			if r := t.test(v); r >= 0 {
-				return r
+			if t.test(v) {
+				return true
 			}
 		}
 	}
-	return -1
+	return false
 }
 
 func (t tracks) do(s string) string {
@@ -75,23 +79,22 @@ func (t tracks) Do(s *Stage) *url.URL {
 	}
 
 	for _, v := range t {
-		matches := v.match(s.URL)
-		if len(matches) < 1 {
+		s.matches = v.match(s.URL)
+		if len(s.matches) < 1 {
 			continue
 		}
 
 		// remove the queries that are not allowed
 		qs := s.URL.Query()
 		allowed, stop := v.allowed(s.URL)
-		removal := validExpr(s.URL, parseExpr(allowed))
-		for _, k := range removal {
+		s.removal = validExpr(s.URL, parseExpr(allowed))
+		for _, k := range s.removal {
 			qs.Del(k)
 		}
 		s.URL.RawQuery = qs.Encode()
 
-		// handle the url with called the custom handler
-		if !stop {
-			s.matches = matches
+		// handle the url with the custom handler called
+		if stop != 1 || (stop == 2 && len(s.removal) > 0) {
 			s.URL = v.handle(s)
 		}
 		break

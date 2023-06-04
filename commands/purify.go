@@ -18,7 +18,7 @@ func Purify(msg *tgbotapi.Message) bool {
 
 	todo := make([]*url.URL, 0, len(urls))
 	for _, u := range urls {
-		if t := purify.Tracks.Test(u); t >= 0 {
+		if purify.Tracks.Test(u) {
 			todo = append(todo, u)
 		}
 	}

@@ -35,6 +35,10 @@ func (*aff) match(u *url.URL) []string {
 	return reAffParams.FindStringSubmatch(u.RawQuery)
 }
 
+func (*aff) allowed(*url.URL) (string, uint8) {
+	return "", 0
+}
+
 func (*aff) handle(s *Stage) *url.URL {
 	qs := s.URL.Query()
 	for name := range qs {
@@ -44,10 +48,6 @@ func (*aff) handle(s *Stage) *url.URL {
 	}
 	s.URL.RawQuery = qs.Encode()
 
-	// dig down to `general`
+	// dig it down to `general`
 	return Tracks.Do(&Stage{URL: s.URL})
-}
-
-func (*aff) allowed(*url.URL) (string, bool) {
-	return "", false
 }

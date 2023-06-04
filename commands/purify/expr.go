@@ -53,13 +53,15 @@ func validExpr(u *url.URL, allowed map[string][]string) (removal []string) {
 		}
 
 		for _, rule := range rules {
-			if rule == "pi" && !expPi(v[0]) {
-				removal = append(removal, k)
-			} else if rule == "ni" && !expNi(v[0]) {
-				removal = append(removal, k)
-			} else if rule != v[0] {
-				removal = append(removal, k)
+			if rule == "pi" && expPi(v[0]) {
+				continue
+			} else if rule == "ni" && expNi(v[0]) {
+				continue
+			} else if rule == v[0] {
+				continue
 			}
+
+			removal = append(removal, k)
 		}
 	}
 	return

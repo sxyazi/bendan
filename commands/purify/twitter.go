@@ -13,10 +13,11 @@ func (*twitter) match(u *url.URL) []string {
 	return reTwitter.FindStringSubmatch(u.String())
 }
 
+func (*twitter) allowed(*url.URL) (string, uint8) {
+	return "-", 1
+}
+
 func (*twitter) handle(*Stage) *url.URL {
 	panic("not implemented")
 }
 
-func (*twitter) allowed(*url.URL) (string, bool) {
-	return "-", true
-}

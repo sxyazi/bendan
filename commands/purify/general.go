@@ -42,6 +42,10 @@ func (*general) match(u *url.URL) []string {
 	return reGeneral.FindStringSubmatch(u.RawQuery)
 }
 
+func (*general) allowed(*url.URL) (string, uint8) {
+	return "", 0
+}
+
 func (*general) handle(s *Stage) *url.URL {
 	qs := s.URL.Query()
 	for name := range qs {
@@ -52,8 +56,4 @@ func (*general) handle(s *Stage) *url.URL {
 
 	s.URL.RawQuery = qs.Encode()
 	return s.URL
-}
-
-func (*general) allowed(*url.URL) (string, bool) {
-	return "", false
 }

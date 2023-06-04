@@ -19,13 +19,17 @@ func (*bilibili) match(u *url.URL) []string {
 	return reBilibiliAV.FindStringSubmatch(u.String())
 }
 
+func (*bilibili) allowed(u *url.URL) (string, uint8) {
+	var stop uint8 = 1
+	if reBilibiliBV.MatchString(u.String()) {
+		stop = 2
+	}
+	return "p:pi", stop
+}
+
 func (b *bilibili) handle(s *Stage) *url.URL {
 	s.URL.Path = "/video/" + b.bvToAv(s.matches[1])
 	return s.URL
-}
-
-func (*bilibili) allowed(u *url.URL) (string, bool) {
-	return "p:pi", reBilibiliAV.MatchString(u.String())
 }
 
 func (*bilibili) bvToAv(s string) string {
