@@ -14,10 +14,19 @@ func (*twitter) match(u *url.URL) []string {
 }
 
 func (*twitter) allowed(*url.URL) (string, uint8) {
-	return "-", 1
+	return ".*", 0
 }
 
-func (*twitter) handle(*Stage) *url.URL {
-	panic("not implemented")
-}
+func (*twitter) handle(s *Stage) *url.URL {
+	if len(s.matches) != 2 {
+		return s.URL
+	}
 
+	newURL, err := url.Parse("https://fxtwitter.com/" + s.matches[1])
+	if err != nil {
+		return s.URL
+	}
+
+	newURL.RawQuery = s.URL.RawQuery
+	return newURL
+}

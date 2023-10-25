@@ -10,6 +10,10 @@ import (
 	"github.com/sxyazi/bendan/utils"
 )
 
+var allowedPreviewDomain = []string{
+	"fxtwitter.com",
+}
+
 func Purify(msg *tgbotapi.Message) bool {
 	urls := utils.ExtractUrls(msg.Text + "\n" + msg.Caption)
 	if len(urls) < 1 {
@@ -48,6 +52,16 @@ func Purify(msg *tgbotapi.Message) bool {
 			text.WriteByte('\n')
 		}
 	}
+
+	if s := text.String(); len(allowedPreviewDomain) > 0 {
+		for _, domain := range allowedPreviewDomain {
+			if strings.Contains(s, domain) {
+				EditTextWithWebPagePreview(sent, "<b>Purified URL:</b> "+s)
+				return true
+			}
+		}
+	}
+
 	if text.Len() < 1 {
 		DeleteMessage(sent)
 	} else if s := text.String(); strings.Count(s, "\n") == 1 {

@@ -54,6 +54,22 @@ func EditText(sent *tgbotapi.Message, text string) bool {
 	return err == nil
 }
 
+func EditTextWithWebPagePreview(sent *tgbotapi.Message, text string) bool {
+	_, err := Bot.Request(tgbotapi.EditMessageTextConfig{
+		BaseEdit: tgbotapi.BaseEdit{
+			ChatID:    sent.Chat.ID,
+			MessageID: sent.MessageID,
+		},
+		Text:                  text,
+		ParseMode:             tgbotapi.ModeHTML,
+		DisableWebPagePreview: false,
+	})
+	if err != nil {
+		log.Println("Error occurred while editing text:", err)
+	}
+	return err == nil
+}
+
 func DeleteMessage(sent *tgbotapi.Message) bool {
 	_, err := Bot.Request(tgbotapi.DeleteMessageConfig{ChatID: sent.Chat.ID, MessageID: sent.MessageID})
 	return err == nil
