@@ -45,7 +45,7 @@ func Pin(msg *tgbotapi.Message) bool {
 	req, err := Bot.Request(&tgbotapi.PinChatMessageConfig{
 		ChatID:              msg.Chat.ID,
 		MessageID:           msg.ReplyToMessage.MessageID,
-		DisableNotification: false,
+		DisableNotification: true,
 	})
 
 	if err != nil {
