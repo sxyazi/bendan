@@ -24,7 +24,7 @@ func (*bilibili) allowed(u *url.URL) (string, uint8) {
 	if reBilibiliBV.MatchString(u.String()) {
 		stop = 2
 	}
-	return "p:pi", stop
+	return "p:pi;t:pf", stop
 }
 
 func (b *bilibili) handle(s *Stage) *url.URL {

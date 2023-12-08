@@ -10,8 +10,16 @@ func expPi(s string) bool {
 	i, err := strconv.Atoi(s)
 	return err == nil && i > 0
 }
+func expPf(s string) bool {
+	i, err := strconv.ParseFloat(s, 64)
+	return err == nil && i > 0
+}
 func expNi(s string) bool {
 	i, err := strconv.Atoi(s)
+	return err == nil && i < 0
+}
+func expNf(s string) bool {
+	i, err := strconv.ParseFloat(s, 64)
 	return err == nil && i < 0
 }
 
@@ -55,7 +63,11 @@ func validExpr(u *url.URL, allowed map[string][]string) (removal []string) {
 		for _, rule := range rules {
 			if rule == "pi" && expPi(v[0]) {
 				continue
+			} else if rule == "pf" && expPf(v[0]) {
+				continue
 			} else if rule == "ni" && expNi(v[0]) {
+				continue
+			} else if rule == "nf" && expNf(v[0]) {
 				continue
 			} else if rule == v[0] {
 				continue
