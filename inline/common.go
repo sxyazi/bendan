@@ -15,16 +15,16 @@ func validateAndExtractQuery(query string) (string, string, error) {
 	return queryParts[0], queryParts[1], nil
 }
 
-func SendInline(inlineQueryID string, result any) *tgbotapi.Message {
-	m, err := Bot.Send(tgbotapi.InlineConfig{
+func SendInline(inlineQueryID string, result any) *tgbotapi.APIResponse {
+	resp, err := Bot.Request(tgbotapi.InlineConfig{
 		InlineQueryID: inlineQueryID,
 		Results:       []any{result},
 		CacheTime:     60,
 		IsPersonal:    true,
 	})
 	if err != nil {
-		log.Println("Error occurred while sending text:", err)
+		log.Println("Error occurred while sending inline:", err)
 		return nil
 	}
-	return &m
+	return resp
 }

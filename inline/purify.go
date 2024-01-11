@@ -58,7 +58,5 @@ func Purify(inlineQuery *tgbotapi.InlineQuery) bool {
 			Text: s.String(),
 		},
 	}
-
-	SendInline(inlineQuery.ID, result)
-	return true
+	return SendInline(inlineQuery.ID, result).Ok
 }
