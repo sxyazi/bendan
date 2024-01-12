@@ -3,6 +3,7 @@ package commands
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	. "github.com/sxyazi/bendan/utils"
+	"strings"
 )
 
 var all = []func(*tgbotapi.Message) bool{
@@ -22,6 +23,10 @@ var all = []func(*tgbotapi.Message) bool{
 	YesLook,
 }
 
+var allInlineQuery = map[string]func(*tgbotapi.InlineQuery) bool{
+	"purify": PurifyByInlineQuery,
+}
+
 var Bot *tgbotapi.BotAPI
 
 func Handle(update *tgbotapi.Update) {
@@ -30,6 +35,15 @@ func Handle(update *tgbotapi.Update) {
 		message = update.Message
 	} else if update.ChannelPost != nil {
 		message = update.ChannelPost
+	} else if update.InlineQuery != nil {
+		command, _, err := ExtractInlineQuery(update.InlineQuery.Query)
+		if err != nil {
+			return
+		}
+		if commandFunc, ok := allInlineQuery[strings.ToLower(command)]; ok {
+			commandFunc(update.InlineQuery)
+			return
+		}
 	} else {
 		return
 	}

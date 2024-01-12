@@ -2,7 +2,6 @@ package boot
 
 import (
 	"fmt"
-	"github.com/sxyazi/bendan/inline"
 	"net/http"
 	"os"
 	"time"
@@ -18,12 +17,9 @@ func ServePool() {
 	u.Timeout = 60
 
 	commands.Bot = bot
-	inline.Bot = bot
-
 	bot.Request(&tgbotapi.DeleteWebhookConfig{})
 	for update := range bot.GetUpdatesChan(u) {
 		commands.Handle(&update)
-		inline.Handle(&update)
 	}
 }
 
