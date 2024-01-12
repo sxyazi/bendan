@@ -25,6 +25,7 @@ var all = []func(*tgbotapi.Message) bool{
 
 var allInlineQuery = map[string]func(*tgbotapi.InlineQuery) bool{
 	"purify": PurifyByInlineQuery,
+	"pu":     PurifyByInlineQuery, // purify alias: purify url (pu)
 }
 
 var Bot *tgbotapi.BotAPI
