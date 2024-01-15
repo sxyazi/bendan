@@ -1,10 +1,8 @@
 package commands
 
 import (
-	"errors"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
-	"strings"
 )
 
 func SendText(chat int64, text string) *tgbotapi.Message {
@@ -73,12 +71,4 @@ func InlineQueryResponse(inlineQueryID string, result any) *tgbotapi.APIResponse
 		return nil
 	}
 	return resp
-}
-
-func ExtractInlineQuery(query string) (string, string, error) {
-	queryParts := strings.SplitN(query, " ", 2)
-	if len(queryParts) != 2 {
-		return "", "", errors.New("invalid query format")
-	}
-	return queryParts[0], queryParts[1], nil
 }

@@ -60,12 +60,7 @@ func Purify(msg *tgbotapi.Message) bool {
 }
 
 func PurifyByInlineQuery(inlineQuery *tgbotapi.InlineQuery) bool {
-	_, text, err := ExtractInlineQuery(inlineQuery.Query)
-	if err != nil {
-		return false
-	}
-
-	urls := utils.ExtractUrls(text + "\n")
+	urls := utils.ExtractUrls(inlineQuery.Query + "\n")
 	if len(urls) < 1 {
 		return false
 	}
@@ -85,27 +80,20 @@ func PurifyByInlineQuery(inlineQuery *tgbotapi.InlineQuery) bool {
 	for i, u := range todo {
 		go func(i int, u *url.URL) {
 			defer wg.Done()
-			todo[i] = purify.Tracks.Do(&purify.Stage{URL: u})
+			inlineQuery.Query = strings.Replace(inlineQuery.Query, u.String(), purify.Tracks.Do(&purify.Stage{URL: u}).String(), -1)
 		}(i, u)
 	}
-
 	wg.Wait()
-
-	var s strings.Builder
-	for _, u := range todo {
-		if u != nil {
-			s.WriteString(u.String())
-			s.WriteByte('\n')
-		}
-	}
 
 	result := tgbotapi.InlineQueryResultArticle{
 		Type:  "article",
 		ID:    uuid.New().String(),
-		Title: "Purified URL: " + s.String(),
+		Title: "Message after purified the URL(s): \n" + inlineQuery.Query,
 		InputMessageContent: tgbotapi.InputTextMessageContent{
-			Text: "Purified URL: " + s.String(),
+			Text:      "<b>Message after purified the URL(s): </b> \n" + inlineQuery.Query,
+			ParseMode: "HTML",
 		},
 	}
-	return InlineQueryResponse(inlineQuery.ID, result).Ok
+	InlineQueryResponse(inlineQuery.ID, result)
+	return true
 }
