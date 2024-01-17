@@ -1,10 +1,11 @@
 package commands
 
 import (
-	"github.com/google/uuid"
 	"net/url"
 	"strings"
 	"sync"
+
+	"github.com/google/uuid"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sxyazi/bendan/commands/purify"
@@ -59,8 +60,8 @@ func Purify(msg *tgbotapi.Message) bool {
 	return true
 }
 
-func PurifyByInlineQuery(inlineQuery *tgbotapi.InlineQuery) bool {
-	urls := utils.ExtractUrls(inlineQuery.Query + "\n")
+func PurifyViaQuery(query *tgbotapi.InlineQuery) bool {
+	urls := utils.ExtractUrls(query.Query + "\n")
 	if len(urls) < 1 {
 		return false
 	}
@@ -80,7 +81,7 @@ func PurifyByInlineQuery(inlineQuery *tgbotapi.InlineQuery) bool {
 	for i, u := range todo {
 		go func(i int, u *url.URL) {
 			defer wg.Done()
-			inlineQuery.Query = strings.Replace(inlineQuery.Query, u.String(), purify.Tracks.Do(&purify.Stage{URL: u}).String(), -1)
+			query.Query = strings.Replace(query.Query, u.String(), purify.Tracks.Do(&purify.Stage{URL: u}).String(), -1)
 		}(i, u)
 	}
 	wg.Wait()
@@ -88,12 +89,12 @@ func PurifyByInlineQuery(inlineQuery *tgbotapi.InlineQuery) bool {
 	result := tgbotapi.InlineQueryResultArticle{
 		Type:  "article",
 		ID:    uuid.New().String(),
-		Title: "Message after purified the URL(s): \n" + inlineQuery.Query,
+		Title: "Message after purified the URL(s): \n" + query.Query,
 		InputMessageContent: tgbotapi.InputTextMessageContent{
-			Text:      "<b>Message after purified the URL(s): </b> \n" + inlineQuery.Query,
+			Text:      "<b>Message after purified the URL(s): </b> \n" + query.Query,
 			ParseMode: "HTML",
 		},
 	}
-	InlineQueryResponse(inlineQuery.ID, result)
+	InlineQueryResponse(query.ID, result)
 	return true
 }
