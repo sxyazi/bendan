@@ -105,6 +105,6 @@ func PurifyViaQuery(query *tgbotapi.InlineQuery) bool {
 			Text: text,
 		},
 	}
-	InlineQueryResponse(query.ID, result)
+	RespondInlineQuery(query.ID, result)
 	return true
 }
