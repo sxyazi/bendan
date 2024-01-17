@@ -12,41 +12,61 @@ import (
 	"github.com/sxyazi/bendan/utils"
 )
 
-func Purify(msg *tgbotapi.Message) bool {
-	urls := utils.ExtractUrls(msg.Text + "\n" + msg.Caption)
+type purifyResult struct {
+	before *url.URL
+	after  *url.URL
+}
+
+func purifyDo(s string) chan []*purifyResult {
+	urls := utils.ExtractUrls(s)
 	if len(urls) < 1 {
-		return false
+		return nil
 	}
 
-	todo := make([]*url.URL, 0, len(urls))
+	todo := make([]*purifyResult, 0, len(urls))
 	for _, u := range urls {
 		if purify.Tracks.Test(u) {
-			todo = append(todo, u)
+			todo = append(todo, &purifyResult{before: u})
 		}
 	}
 	if len(todo) < 1 {
-		return false
+		return nil
 	}
 
-	wg := sync.WaitGroup{}
-	wg.Add(len(todo))
-	for i, u := range todo {
-		go func(i int, u *url.URL) {
-			defer wg.Done()
-			todo[i] = purify.Tracks.Do(&purify.Stage{URL: u})
-		}(i, u)
+	ch := make(chan []*purifyResult, 1)
+	go func() {
+		wg := sync.WaitGroup{}
+		wg.Add(len(todo))
+		for _, r := range todo {
+			go func(r *purifyResult) {
+				defer wg.Done()
+				url := *r.before // Clone a new URL without modifying the original one
+				r.after = purify.Tracks.Do(&purify.Stage{URL: &url})
+			}(r)
+		}
+
+		wg.Wait()
+		ch <- todo
+	}()
+
+	return ch
+}
+
+func Purify(msg *tgbotapi.Message) bool {
+	ch := purifyDo(msg.Text + "\n" + msg.Caption)
+	if ch == nil {
+		return false
 	}
 
 	sent := ReplyText(msg, "Purifying up the URLs...")
 	if sent == nil {
 		return true
 	}
-	wg.Wait()
 
 	var text strings.Builder
-	for _, u := range todo {
-		if u != nil {
-			text.WriteString(u.String())
+	for _, r := range <-ch {
+		if r.after != nil {
+			text.WriteString(r.after.String())
 			text.WriteByte('\n')
 		}
 	}
@@ -55,44 +75,34 @@ func Purify(msg *tgbotapi.Message) bool {
 	} else if s := text.String(); strings.Count(s, "\n") == 1 {
 		EditText(sent, "<b>Purified URL:</b> "+s)
 	} else {
-		EditText(sent, "<b>The URLs purified below:</b>\n\n"+s)
+		EditText(sent, "<b>The URL(s) purified below:</b>\n\n"+s)
 	}
 	return true
 }
 
 func PurifyViaQuery(query *tgbotapi.InlineQuery) bool {
-	urls := utils.ExtractUrls(query.Query + "\n")
-	if len(urls) < 1 {
+	ch := purifyDo(query.Query)
+	if ch == nil {
 		return false
 	}
 
-	todo := make([]*url.URL, 0, len(urls))
-	for _, u := range urls {
-		if purify.Tracks.Test(u) {
-			todo = append(todo, u)
+	text := query.Query
+	for _, r := range <-ch {
+		if r.after != nil {
+			text = strings.Replace(text, r.before.String(), r.after.String(), 1)
 		}
 	}
-	if len(todo) < 1 {
+
+	if text == query.Query {
 		return false
 	}
-
-	wg := sync.WaitGroup{}
-	wg.Add(len(todo))
-	for i, u := range todo {
-		go func(i int, u *url.URL) {
-			defer wg.Done()
-			query.Query = strings.Replace(query.Query, u.String(), purify.Tracks.Do(&purify.Stage{URL: u}).String(), -1)
-		}(i, u)
-	}
-	wg.Wait()
 
 	result := tgbotapi.InlineQueryResultArticle{
 		Type:  "article",
 		ID:    uuid.New().String(),
-		Title: "Message after purified the URL(s): \n" + query.Query,
+		Title: utils.TruncateUTF8(text, 64),
 		InputMessageContent: tgbotapi.InputTextMessageContent{
-			Text:      "<b>Message after purified the URL(s): </b> \n" + query.Query,
-			ParseMode: "HTML",
+			Text: text,
 		},
 	}
 	InlineQueryResponse(query.ID, result)

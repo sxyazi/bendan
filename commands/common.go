@@ -1,8 +1,9 @@
 package commands
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func SendText(chat int64, text string) *tgbotapi.Message {
@@ -59,9 +60,9 @@ func DeleteMessage(sent *tgbotapi.Message) bool {
 	return err == nil
 }
 
-func InlineQueryResponse(inlineQueryID string, result any) *tgbotapi.APIResponse {
+func InlineQueryResponse(id string, result any) *tgbotapi.APIResponse {
 	resp, err := Bot.Request(tgbotapi.InlineConfig{
-		InlineQueryID: inlineQueryID,
+		InlineQueryID: id,
 		Results:       []any{result},
 		CacheTime:     60,
 		IsPersonal:    true,

@@ -207,3 +207,16 @@ func RandString(n int) string {
 	}
 	return string(b)
 }
+
+func TruncateUTF8(s string, max int) string {
+	if len(s) <= max {
+		return s
+	}
+
+	for i := range s {
+		if i > max {
+			return s[:i]
+		}
+	}
+	return s
+}
