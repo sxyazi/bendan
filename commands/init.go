@@ -5,7 +5,11 @@ import (
 	. "github.com/sxyazi/bendan/utils"
 )
 
-var all = []func(*tgbotapi.Message) bool{
+var viaQuery = []func(*tgbotapi.InlineQuery) bool{
+	PurifyViaQuery,
+}
+
+var viaMessage = []func(*tgbotapi.Message) bool{
 	ForwardMark,
 	Pin,
 	Whoami,
@@ -25,6 +29,11 @@ var all = []func(*tgbotapi.Message) bool{
 var Bot *tgbotapi.BotAPI
 
 func Handle(update *tgbotapi.Update) {
+	if update.InlineQuery != nil {
+		HandleQuery(update.InlineQuery)
+		return
+	}
+
 	var message *tgbotapi.Message
 	if update.Message != nil {
 		message = update.Message
@@ -39,8 +48,16 @@ func Handle(update *tgbotapi.Update) {
 	}
 
 	//log.Printf("[%s] says: %s", message.From.UserName, message.Text)
-	for _, command := range all {
-		if command(message) {
+	for _, f := range viaMessage {
+		if f(message) {
+			break
+		}
+	}
+}
+
+func HandleQuery(query *tgbotapi.InlineQuery) {
+	for _, f := range viaQuery {
+		if f(query) {
 			break
 		}
 	}

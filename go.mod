@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
-	github.com/mattn/go-sqlite3 v1.14.16
+	github.com/google/uuid v1.5.0
 	github.com/sxyazi/go-collection v0.0.3
 	go.mongodb.org/mongo-driver v1.11.1
 )
