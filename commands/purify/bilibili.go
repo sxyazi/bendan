@@ -2,9 +2,10 @@ package purify
 
 import (
 	"fmt"
-	"math"
+	"math/big"
 	"net/url"
 	"regexp"
+	"strings"
 )
 
 type bilibili struct{}
@@ -32,17 +33,17 @@ func (b *bilibili) handle(s *Stage) *url.URL {
 	return s.URL
 }
 
+// The implementation of golang code is based on https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/misc/bvid_desc.md
 func (*bilibili) bvToAv(s string) string {
-	t := "fZodR9XQDSUm21yCkr6zBqiveYah8bt4xsWpHnJE7jL5VG3guMTKNPAwcF"
-	tr := make(map[rune]int, len(t))
-	n := []int{11, 10, 3, 8, 4, 6}
-	for i, c := range t {
-		tr[c] = i
+	data := "FcwAPNKTMug3GV5Lj7EJnHpWsx4tb8haYeviqBz6rkCy12mUSDQX9RdoZf"
+	arr := strings.Split(s, "")
+	arr[3], arr[9] = arr[9], arr[3]
+	arr[4], arr[7] = arr[7], arr[4]
+	t := big.NewInt(0)
+	for _, c := range arr[3:] {
+		t.Mul(t, big.NewInt(58))
+		t.Add(t, big.NewInt(int64(strings.IndexByte(data, c[0]))))
 	}
-
-	var r int
-	for i := 0; i < 6; i++ {
-		r += tr[rune(s[n[i]])] * int(math.Pow(58, float64(i)))
-	}
-	return fmt.Sprintf("av%d", (r-8728348608)^177451812)
+	avid := t.Xor(t.And(t, big.NewInt(2251799813685247)), big.NewInt(23442827791579)).Int64()
+	return fmt.Sprintf("av%d", avid)
 }
