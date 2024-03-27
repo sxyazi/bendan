@@ -38,9 +38,13 @@ var Cfg struct {
 }
 
 func init() {
+	if Config("forward_config") == "" {
+		log.Println("Detected forward_config is empty! Forward func may not work!")
+		return
+	}
 	err := json.Unmarshal([]byte(Config("forward_config")), &Cfg)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Unmrshal forward_config failed: %s", err)
 	}
 }
 

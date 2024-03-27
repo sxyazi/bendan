@@ -20,7 +20,9 @@ func Db() *mongo.Database {
 		var err error
 		client, err = mongo.Connect(ctx, options.Client().ApplyURI(Config("db_uri")))
 		if err != nil {
-			log.Fatal(err)
+			log.Println("Database initialization failed:", err)
+			log.Println("Database is disabled! Some database features may cause bot errors when called!")
+			return
 		}
 
 		db = client.Database(Config("db_name"))
@@ -29,6 +31,11 @@ func Db() *mongo.Database {
 }
 
 func Indexes() {
+
+	if Db() == nil {
+		return
+	}
+
 	// Indexes for replied
 	Db().Collection("replied").Indexes().DropAll(ctx)
 	Db().Collection("replied").Indexes().CreateMany(ctx, []mongo.IndexModel{
