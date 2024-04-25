@@ -76,6 +76,8 @@ func (t tracks) Do(s *Stage) *url.URL {
 	s.Deep++
 	if s.Deep > 5 {
 		return nil // avoid infinite loop
+	} else if s.URL == nil {
+		return nil // avoid nil pointer
 	}
 
 	for _, v := range t {
@@ -98,6 +100,12 @@ func (t tracks) Do(s *Stage) *url.URL {
 			s.URL = v.handle(s)
 		}
 		break
+	}
+
+	// After handling, the URL might become nil,
+	// such as, if it exceeds the maximum depth (s.Deep > 5).
+	if s.URL == nil {
+		return nil
 	}
 
 	// do purify for the queries of the rest recursively
