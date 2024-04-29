@@ -17,6 +17,7 @@ var viaMessage = []func(*tgbotapi.Message) bool{
 	Eval,
 	Dontworry,
 	Call,
+	Hush,
 	Mark,
 	Forward,
 	Purify,
