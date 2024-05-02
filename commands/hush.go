@@ -68,11 +68,11 @@ func Hush(msg *tgbotapi.Message) bool {
 
 	if msg.ReplyToMessage != nil && strings.Contains(msg.Text, "闭嘴") {
 		err := writeTimeToFile(chatID)
-		if err == nil {
-			ReplyText(msg, "好吧...")
-		} else {
+		if err != nil {
 			log.Println("Hush Err:", err)
 			ReplyText(msg, "想闭，但闭不了嘴...")
+		} else {
+			ReplyText(msg, "好吧...")
 		}
 		return true
 	}
