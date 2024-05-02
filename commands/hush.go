@@ -51,12 +51,17 @@ func Hush(msg *tgbotapi.Message) bool {
 	chatID := strconv.FormatInt(msg.Chat.ID, 10)
 
 	if msg.ReplyToMessage != nil && strings.Contains(msg.Text, "说话") {
-		err := os.Remove(filepath.Join(hushDir, chatID))
-		if err != nil {
-			log.Println("Hush Err:", err)
-			ReplyText(msg, "想说，但说不出来...")
+		path := filepath.Join(hushDir, chatID)
+		if _, err := os.Stat(path); err == nil {
+			err := os.Remove(path)
+			if err != nil {
+				log.Println("Hush Err:", err)
+				ReplyText(msg, "想说，但说不出来。。。")
+			} else {
+				ReplyText(msg, "哈？我又可以说话了吗？")
+			}
 		} else {
-			ReplyText(msg, "已经在说了...")
+			ReplyText(msg, "已经在说了。。。")
 		}
 		return true
 	}
@@ -70,9 +75,9 @@ func Hush(msg *tgbotapi.Message) bool {
 		err := writeTimeToFile(chatID)
 		if err != nil {
 			log.Println("Hush Err:", err)
-			ReplyText(msg, "想闭，但闭不了嘴...")
+			ReplyText(msg, "想闭，但闭不了嘴。。。")
 		} else {
-			ReplyText(msg, "好吧...")
+			ReplyText(msg, "好吧。。。")
 		}
 		return true
 	}
