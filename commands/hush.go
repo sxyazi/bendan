@@ -17,7 +17,6 @@ func init() {
 	err := os.MkdirAll(baseHushDir, 0755)
 	if err != nil {
 		log.Println("hush init failed: ", err)
-		return
 	}
 }
 
