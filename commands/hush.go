@@ -36,16 +36,15 @@ func readTimeFromFile(chatID string) (time.Time, error) {
 }
 
 func writeTimeToFile(chatID string) error {
-	filePath := filepath.Join(filepath.Join(baseHushDir, chatID))
-	after30Minutes := time.Now().Add(30 * time.Minute)
-	fileContent := strconv.Itoa(int(after30Minutes.Unix()))
-	err := os.WriteFile(filePath, []byte(fileContent), 0644)
+	path := filepath.Join(cacheDir, chatID)
+	content := fmt.Sprintf("%d", time.Now().Add(30*time.Minute).Unix())
 
+	err := os.WriteFile(path, []byte(content), 0644)
 	if err != nil {
-		return fmt.Errorf("writeTimeToFile: %v", err)
+		fmt.Errorf("writeTimeToFile: %v", err)
 	}
 
-	return nil
+	return err
 }
 
 func Hush(msg *tgbotapi.Message) bool {
