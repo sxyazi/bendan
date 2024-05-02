@@ -33,8 +33,7 @@ func readTimeFromFile(chatID string) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("readTimeFromFile: %v", err)
 	}
 
-	timestamp := time.Unix(unixTime, 0)
-	return timestamp, nil
+	return time.Unix(unixTime, 0), nil
 }
 
 func writeTimeToFile(chatID string) error {
