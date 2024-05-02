@@ -11,23 +11,23 @@ import (
 	"time"
 )
 
-var cacheDir = filepath.Join(os.TempDir(), "/bendan/hush")
+var hushDir = filepath.Join(os.TempDir(), "/bendan/hush")
 
 func init() {
-	err := os.MkdirAll(baseHushDir, 0755)
+	err := os.MkdirAll(hushDir, 0755)
 	if err != nil {
-		log.Println("hush init failed: ", err)
+		log.Println("Hush init failed: ", err)
 	}
 }
 
 func readTimeFromFile(chatID string) (time.Time, error) {
-	filePath := filepath.Join(filepath.Join(baseHushDir, chatID))
-	fileContent, err := os.ReadFile(filePath)
+	path := filepath.Join(hushDir, chatID)
+	content, err := os.ReadFile(path)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("readTimeFromFile: %v", err)
 	}
 
-	unixTime, err := strconv.ParseInt(string(fileContent), 10, 64)
+	unixTime, err := strconv.ParseInt(string(content), 10, 64)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("readTimeFromFile: %v", err)
 	}
@@ -36,12 +36,12 @@ func readTimeFromFile(chatID string) (time.Time, error) {
 }
 
 func writeTimeToFile(chatID string) error {
-	path := filepath.Join(cacheDir, chatID)
-	content := fmt.Sprintf("%d", time.Now().Add(30*time.Minute).Unix())
+	path := filepath.Join(hushDir, chatID)
+	content := strconv.FormatInt(time.Now().Add(30*time.Minute).Unix(), 10)
 
 	err := os.WriteFile(path, []byte(content), 0644)
 	if err != nil {
-		fmt.Errorf("writeTimeToFile: %v", err)
+		log.Println("writeTimeToFile: ", err)
 	}
 
 	return err
@@ -52,7 +52,7 @@ func Hush(msg *tgbotapi.Message) bool {
 	if msg.ReplyToMessage != nil && strings.Contains(msg.Text, "说话") {
 		err := writeTimeToFile(chatID)
 		if err == nil {
-			err := os.Remove(filepath.Join(filepath.Join(baseHushDir, chatID)))
+			err := os.Remove(filepath.Join(filepath.Join(hushDir, chatID)))
 			if err != nil {
 				log.Println("Hush Err:", err)
 				ReplyText(msg, "想说，但说不出来...")
