@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var baseHushDir = filepath.Join(os.TempDir(), "/bendan/hush")
+var cacheDir = filepath.Join(os.TempDir(), "/bendan/hush")
 
 func init() {
 	err := os.MkdirAll(baseHushDir, 0755)
