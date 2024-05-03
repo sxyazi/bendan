@@ -1,20 +1,22 @@
 package commands
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"errors"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"time"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
+
+const hushDuration = 30 * time.Minute
 
 var hushDir = filepath.Join(os.TempDir(), "/bendan/hush")
 var reHush = regexp.MustCompile("别说话|闭嘴|安静")
 var reUnHush = regexp.MustCompile("说话")
-
-const hushMinutes = 30 * time.Minute
 
 func init() {
 	if err := os.MkdirAll(hushDir, 0755); err != nil {
@@ -24,35 +26,28 @@ func init() {
 
 func Hush(msg *tgbotapi.Message) bool {
 	path := filepath.Join(hushDir, strconv.FormatInt(msg.Chat.ID, 10))
+	repliesToBot := msg.ReplyToMessage != nil && msg.ReplyToMessage.From.ID == Bot.Self.ID
 
-	if msg.ReplyToMessage != nil && reHush.MatchString(msg.Text) {
-		if err := os.WriteFile(path, nil, 0644); err != nil {
-			log.Println("Hush Err:", err)
-			ReplyText(msg, "想闭，但闭不了嘴。。。")
+	if repliesToBot && reHush.MatchString(msg.Text) {
+		if err := os.WriteFile(path, nil, 0644); err == nil {
+			ReplyText(msg, "😭")
 		} else {
-			ReplyText(msg, "好吧。。。")
+			log.Println("Hush failed:", err)
+			ReplyText(msg, "不要！")
 		}
 		return true
 	}
 
-	if msg.ReplyToMessage != nil && reUnHush.MatchString(msg.Text) {
-		if info, err := os.Lstat(path); err == nil {
-			if err := os.Remove(path); err != nil {
-				log.Println("Hush Err:", err)
-				ReplyText(msg, "想说，但说不出来。。。")
-				return true
-			} else if time.Now().Before(info.ModTime().Add(hushMinutes)) {
-				ReplyText(msg, "哈？我又可以说话了吗？")
-				return true
-			}
+	if repliesToBot && reUnHush.MatchString(msg.Text) {
+		if err := os.Remove(path); err == nil || errors.Is(err, os.ErrNotExist) {
+			ReplyText(msg, "好耶！")
+		} else {
+			log.Println("UnHush failed:", err)
+			ReplyText(msg, "不要！")
 		}
-		ReplyText(msg, "哈？你想让我说什么？")
 		return true
 	}
 
-	if info, err := os.Lstat(path); err == nil && time.Now().Before(info.ModTime().Add(hushMinutes)) {
-		return true
-	}
-
-	return false
+	info, err := os.Lstat(path)
+	return err == nil && time.Now().Before(info.ModTime().Add(hushDuration))
 }
