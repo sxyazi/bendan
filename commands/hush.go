@@ -23,8 +23,7 @@ func init() {
 }
 
 func readTimeFromFile(chatID string) (time.Time, error) {
-	path := filepath.Join(hushDir, chatID)
-	content, err := os.ReadFile(path)
+	content, err := os.ReadFile(filepath.Join(hushDir, chatID))
 	if err != nil {
 		return time.Time{}, fmt.Errorf("readTimeFromFile: %v", err)
 	}
