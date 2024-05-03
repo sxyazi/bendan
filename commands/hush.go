@@ -64,7 +64,7 @@ func Hush(msg *tgbotapi.Message) bool {
 
 	if msg.ReplyToMessage != nil && reUnHush.MatchString(msg.Text) {
 		path := filepath.Join(hushDir, chatID)
-		if _, err := os.Stat(path); err == nil {
+		if _, err := os.Lstat(path); err == nil {
 			err := os.Remove(path)
 			if err != nil {
 				log.Println("Hush Err:", err)
