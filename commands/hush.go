@@ -14,6 +14,8 @@ var hushDir = filepath.Join(os.TempDir(), "/bendan/hush")
 var reHush = regexp.MustCompile("别说话|闭嘴|安静")
 var reUnHush = regexp.MustCompile("说话")
 
+const hushMinutes = 30 * time.Minute
+
 func init() {
 	if err := os.MkdirAll(hushDir, 0755); err != nil {
 		log.Println("Hush init failed:", err)
@@ -34,20 +36,19 @@ func Hush(msg *tgbotapi.Message) bool {
 	}
 
 	if msg.ReplyToMessage != nil && reUnHush.MatchString(msg.Text) {
-		if _, err := os.Lstat(path); err == nil {
+		if info, err := os.Lstat(path); err == nil {
 			if err := os.Remove(path); err != nil {
 				log.Println("Hush Err:", err)
 				ReplyText(msg, "想说，但说不出来。。。")
-			} else {
+			} else if time.Now().Before(info.ModTime().Add(hushMinutes)) {
 				ReplyText(msg, "哈？我又可以说话了吗？")
 			}
-		} else {
-			ReplyText(msg, "哈？你想让我说什么？")
 		}
+		ReplyText(msg, "哈？你想让我说什么？")
 		return true
 	}
 
-	if info, err := os.Lstat(path); err == nil && time.Now().Before(info.ModTime().Add(30*time.Minute)) {
+	if info, err := os.Lstat(path); err == nil && time.Now().Before(info.ModTime().Add(hushMinutes)) {
 		return true
 	}
 
