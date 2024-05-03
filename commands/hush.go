@@ -15,9 +15,8 @@ var reHush = regexp.MustCompile("别说话|闭嘴|安静")
 var reUnHush = regexp.MustCompile("说话")
 
 func init() {
-	err := os.MkdirAll(hushDir, 0755)
-	if err != nil {
-		log.Println("Hush init failed: ", err)
+	if err := os.MkdirAll(hushDir, 0755); err != nil {
+		log.Println("Hush init failed:", err)
 	}
 }
 
@@ -25,8 +24,7 @@ func Hush(msg *tgbotapi.Message) bool {
 	path := filepath.Join(hushDir, strconv.FormatInt(msg.Chat.ID, 10))
 
 	if msg.ReplyToMessage != nil && reHush.MatchString(msg.Text) {
-		err := os.WriteFile(path, nil, 0644)
-		if err != nil {
+		if err := os.WriteFile(path, nil, 0644); err != nil {
 			log.Println("Hush Err:", err)
 			ReplyText(msg, "想闭，但闭不了嘴。。。")
 		} else {
@@ -37,8 +35,7 @@ func Hush(msg *tgbotapi.Message) bool {
 
 	if msg.ReplyToMessage != nil && reUnHush.MatchString(msg.Text) {
 		if _, err := os.Lstat(path); err == nil {
-			err := os.Remove(path)
-			if err != nil {
+			if err := os.Remove(path); err != nil {
 				log.Println("Hush Err:", err)
 				ReplyText(msg, "想说，但说不出来。。。")
 			} else {
@@ -50,8 +47,7 @@ func Hush(msg *tgbotapi.Message) bool {
 		return true
 	}
 
-	info, err := os.Lstat(path)
-	if err == nil && time.Now().Before(info.ModTime().Add(30*time.Minute)) {
+	if info, err := os.Lstat(path); err == nil && time.Now().Before(info.ModTime().Add(30*time.Minute)) {
 		return true
 	}
 
