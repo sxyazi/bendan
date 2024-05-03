@@ -40,6 +40,7 @@ func Hush(msg *tgbotapi.Message) bool {
 			if err := os.Remove(path); err != nil {
 				log.Println("Hush Err:", err)
 				ReplyText(msg, "想说，但说不出来。。。")
+				return true
 			} else if time.Now().Before(info.ModTime().Add(hushMinutes)) {
 				ReplyText(msg, "哈？我又可以说话了吗？")
 			}
