@@ -43,6 +43,7 @@ func Hush(msg *tgbotapi.Message) bool {
 				return true
 			} else if time.Now().Before(info.ModTime().Add(hushMinutes)) {
 				ReplyText(msg, "哈？我又可以说话了吗？")
+				return true
 			}
 		}
 		ReplyText(msg, "哈？你想让我说什么？")
