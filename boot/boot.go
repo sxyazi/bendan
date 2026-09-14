@@ -24,9 +24,17 @@ func ServePool() {
 }
 
 func ServeHook(w http.ResponseWriter, _ *http.Request) {
+	secret := Config("webhook_secret")
+	if secret == "" {
+		http.Error(w, "WEBHOOK_SECRET is not configured", http.StatusInternalServerError)
+		return
+	}
+
 	bot := CreateBot()
-	wh, _ := tgbotapi.NewWebhook(fmt.Sprintf("https://%s/hook/", os.Getenv("VERCEL_URL")))
-	if _, err := bot.Request(wh); err != nil {
+	if _, err := bot.MakeRequest("setWebhook", tgbotapi.Params{
+		"url":          fmt.Sprintf("https://%s/hook/", os.Getenv("VERCEL_URL")),
+		"secret_token": secret,
+	}); err != nil {
 		fmt.Fprint(w, err.Error())
 		return
 	}

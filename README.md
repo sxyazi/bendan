@@ -26,6 +26,7 @@
 
 - `BOT_TOKEN`：Telegram Bot 的 Token
 - `REFRESH_KEY`：用于第一次触发 Webhook 配置的密钥
+- `WEBHOOK_SECRET`：Telegram Webhook 请求鉴权密钥，需使用随机字符串
 - `DB_URI`：（可选）MongoDB 的连接 URI。用于置顶、转发功能，不需要这些功能则不配置
 - `DB_NAME`：（可选）MongoDB 的数据库名称。同上，可不配置
 - `FORWARD_CONFIG`：（可选）转发功能配置，JSON 字符串，具体字段见 [部署到 Server](#部署到-Server)。无需该功能则不配置
@@ -40,6 +41,7 @@
 {
   "bot_token": "...",
   "refresh_key": "secret",
+  "webhook_secret": "随机字符串",
   "db_uri": "mongodb+srv://...",
   "db_name": "bendan",
   "forward_config": {
