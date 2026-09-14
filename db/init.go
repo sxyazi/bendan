@@ -3,9 +3,9 @@ package db
 import (
 	"context"
 	. "github.com/sxyazi/bendan/utils"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"log"
 	"sync"
 )
@@ -18,7 +18,7 @@ var connectOnce = sync.Once{}
 func Db() *mongo.Database {
 	connectOnce.Do(func() {
 		var err error
-		client, err = mongo.Connect(ctx, options.Client().ApplyURI(Config("db_uri")))
+		client, err = mongo.Connect(options.Client().ApplyURI(Config("db_uri")))
 		if err != nil {
 			log.Println("Database initialization failed:", err)
 			log.Println("Database is disabled! Some database features may cause bot errors when called!")
@@ -40,7 +40,7 @@ func Indexes() {
 	Db().Collection("replied").Indexes().DropAll(ctx)
 	Db().Collection("replied").Indexes().CreateMany(ctx, []mongo.IndexModel{
 		{
-			Keys:    bson.D{{"chatId", 1}, {"id", 1}},
+			Keys:    bson.D{{Key: "chatId", Value: 1}, {Key: "id", Value: 1}},
 			Options: options.Index().SetUnique(true),
 		},
 	})
@@ -49,7 +49,7 @@ func Indexes() {
 	Db().Collection("pinned").Indexes().DropAll(ctx)
 	Db().Collection("pinned").Indexes().CreateMany(ctx, []mongo.IndexModel{
 		{
-			Keys:    bson.D{{"chatId", 1}, {"id", 1}},
+			Keys:    bson.D{{Key: "chatId", Value: 1}, {Key: "id", Value: 1}},
 			Options: options.Index().SetUnique(true),
 		},
 	})
@@ -58,7 +58,7 @@ func Indexes() {
 	Db().Collection("forwarded").Indexes().DropAll(ctx)
 	Db().Collection("forwarded").Indexes().CreateMany(ctx, []mongo.IndexModel{
 		{
-			Keys:    bson.D{{"chatId", 1}, {"id", 1}},
+			Keys:    bson.D{{Key: "chatId", Value: 1}, {Key: "id", Value: 1}},
 			Options: options.Index().SetUnique(true),
 		},
 	})

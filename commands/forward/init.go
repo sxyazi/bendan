@@ -16,7 +16,7 @@ import (
 	"github.com/sxyazi/bendan/types"
 	. "github.com/sxyazi/bendan/utils"
 	collect "github.com/sxyazi/go-collection"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 var Cfg struct {

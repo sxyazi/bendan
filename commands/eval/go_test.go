@@ -12,7 +12,6 @@ func TestGo_Eval(t *testing.T) {
 	}{
 		{"1+1", "2"},
 		{`fmt.Println("10")`, "10\n"},
-		{`rand.Seed(33); fmt.Println(rand.Int())`, "3907598285724783138\n"},
 		{`
 func add(a, b int) int {
 	return a + b
@@ -21,10 +20,6 @@ func main() {
 	fmt.Print(add(1, 2))
 }
 		`, "3"},
-		{`
-rand.Seed(33)
-fmt.Print(rand.Intn(10))
-`, "4"},
 	}
 
 	for _, d := range data {

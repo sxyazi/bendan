@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/sxyazi/bendan/types"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 func AddPinned(pm *types.PinnedMessage) error {

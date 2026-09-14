@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/sxyazi/bendan/types"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func AddReplied(rm *types.RepliedMessage) error {
